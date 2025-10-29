@@ -3,8 +3,10 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useMemo } from 'react';
 import Layout from '../components/Layout';
 import SEOHead from '../components/SEOHead';
+import BlockRenderer from '../components/BlockRenderer';
 import { useLanguage } from './_app';
-import { getDetailContent, getContentList, DetailContent } from '../lib/detail-api';
+import { getDetailContent, getContentList, DetailContent, BlockContent } from '../lib/detail-api';
+import { parseMarkdown, isMarkdown } from '../lib/markdown-parser';
 
 interface DetailPageProps {
   channelType: string;
@@ -12,7 +14,7 @@ interface DetailPageProps {
   initialContent: {
     title: string;
     description: string;
-    content: string | null;
+    contents: BlockContent[] | string | null;
     locale: string;
     createdAt: string;
     cover?: string | null;
@@ -31,34 +33,24 @@ export default function DetailPage({
   const [content, setContent] = useState(initialContent);
   const [loading, setLoading] = useState(false);
 
-  // 将常见 Markdown 语法转为 HTML（最小实现：图片、链接、换行与段落）
+  // 使用新的 Markdown 解析器
   const convertMarkdownToHtml = (markdown: string): string => {
     if (!markdown) return '';
-    let html = markdown;
-    // 图片: ![alt](url)
-    html = html.replace(
-      /!\[([^\]]*)\]\(([^\)]+)\)/g,
-      '<img src="$2" alt="$1" style="max-width:100%;height:auto;display:block;margin:0 auto;" loading="lazy" />'
-    );
-    // 链接: [text](url)
-    html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    // 将两个以上换行视为新段落
-    html = html.replace(/\n{2,}/g, '</p><p>');
-    // 将单换行转为 <br/>
-    html = html.replace(/\n/g, '<br/>');
-    // 包一层段落，避免裸文本
-    if (!/^\s*<p[>\s]/i.test(html)) {
-      html = `<p>${html}</p>`;
-    }
-    return html;
+    return parseMarkdown(markdown);
   };
 
-  // 预处理正文：若包含 Markdown 图片/链接语法，则先转换为 HTML
+  // 检查内容类型并处理
+  const isBlockContent = useMemo(() => {
+    return Array.isArray(content.contents);
+  }, [content.contents]);
+
+  // 预处理正文：检测并转换 Markdown 语法（仅用于字符串内容）
   const htmlContent = useMemo(() => {
-    const raw = content.content || '';
-    const looksLikeMarkdown = /!\[[^\]]*\]\([^\)]+\)|\[[^\]]+\]\([^\)]+\)/.test(raw);
+    if (isBlockContent) return '';
+    const raw = typeof content.contents === 'string' ? content.contents : '';
+    const looksLikeMarkdown = isMarkdown(raw);
     return looksLikeMarkdown ? convertMarkdownToHtml(raw) : raw;
-  }, [content.content]);
+  }, [content.contents, isBlockContent]);
 
   // 获取相关文章
   const currentLocale = language === 'zh-Hans' ? 'zh-Hans' : 'en';
@@ -76,7 +68,7 @@ export default function DetailPage({
             setContent({
               title: newContent.title || content.title,
               description: newContent.description || newContent.descript || content.description,
-              content: newContent.content || content.content,
+              contents: newContent.contents || content.contents,
               locale: newContent.locale || currentLocale,
               createdAt: newContent.createdAt || content.createdAt,
               cover: newContent.cover?.url || content.cover,
@@ -93,7 +85,7 @@ export default function DetailPage({
 
       fetchContentForLanguage();
     }
-  }, [currentLocale, channelType, documentId, content.locale, content.title, content.description, content.content, content.createdAt, content.cover]);
+  }, [currentLocale, channelType, documentId, content.locale, content.title, content.description, content.contents, content.createdAt, content.cover]);
 
   // 路由变化时重置内容
   useEffect(() => {
@@ -268,13 +260,20 @@ export default function DetailPage({
                   {content.description}
                 </p>
 
-                <div className="prose prose-lg max-w-none dark:prose-invert mb-10 wow fadeInUp text-justify" data-wow-delay=".1s" style={{ textAlign: 'justify' }}>
-                  {content.content ? (
-                    <div 
-                      dangerouslySetInnerHTML={{ __html: htmlContent }} 
-                      className="text-justify"
-                      style={{ textAlign: 'justify', lineHeight: '1.7' }}
-                    />
+                <div className="mb-10 wow fadeInUp" data-wow-delay=".1s">
+                  {content.contents ? (
+                    isBlockContent ? (
+                      <BlockRenderer 
+                        blocks={content.contents as BlockContent[]} 
+                        className="text-justify"
+                      />
+                    ) : (
+                      <div 
+                        className="prose prose-lg max-w-none dark:prose-invert text-justify"
+                        dangerouslySetInnerHTML={{ __html: htmlContent }} 
+                        style={{ textAlign: 'justify', lineHeight: '1.7' }}
+                      />
+                    )
                   ) : (
                     <p className="text-body-color dark:text-dark-6 text-justify">
                       {language === 'zh-Hans' ? '暂无内容' : 'No content available'}
@@ -643,7 +642,7 @@ export const getStaticProps: GetStaticProps<DetailPageProps> = async ({ params }
         initialContent: {
           title: content.title || 'Untitled',
           description: content.description || content.descript || '',
-          content: content.content || null,
+          contents: content.contents || null,
           locale: content.locale || 'en',
           createdAt: content.createdAt || new Date().toISOString(),
           cover: content.cover?.url || null,

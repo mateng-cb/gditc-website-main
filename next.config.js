@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 静态导出模式
   output: 'export',
   trailingSlash: true,
   distDir: 'out',

@@ -17,6 +17,48 @@ strapiAPI.interceptors.request.use((config) => {
   return config;
 });
 
+// Block 内容类型定义
+export interface BlockText {
+  text: string;
+  type: 'text';
+}
+
+export interface BlockChild {
+  text: string;
+  type: 'text';
+}
+
+export interface BlockImage {
+  ext: string;
+  url: string;
+  hash: string;
+  mime: string;
+  name: string;
+  size: number;
+  width: number;
+  height: number;
+  caption?: string;
+  formats?: {
+    large?: { url: string; width: number; height: number; size: number; sizeInBytes: number };
+    small?: { url: string; width: number; height: number; size: number; sizeInBytes: number };
+    medium?: { url: string; width: number; height: number; size: number; sizeInBytes: number };
+    thumbnail?: { url: string; width: number; height: number; size: number; sizeInBytes: number };
+  };
+  provider: string;
+  createdAt: string;
+  updatedAt: string;
+  previewUrl?: string;
+  alternativeText?: string;
+  provider_metadata?: any;
+}
+
+export interface BlockContent {
+  type: 'heading' | 'paragraph' | 'image' | 'list' | 'quote' | 'code';
+  level?: number; // 用于 heading
+  children: BlockChild[];
+  image?: BlockImage; // 用于 image 类型
+}
+
 // 详情页面内容接口
 export interface DetailContent {
   id: number;
@@ -24,7 +66,7 @@ export interface DetailContent {
   title: string;
   slug?: string;
   description?: string;
-  content: string;
+  contents: BlockContent[];
   locale: string;
   createdAt: string;
   updatedAt: string;

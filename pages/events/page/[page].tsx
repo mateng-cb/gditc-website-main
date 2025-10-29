@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import { EmptyEvents } from '../../../components/EmptyState'
 import { getEvents, Event as StrapiEvent } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
 
@@ -13,6 +14,7 @@ interface Event {
   title: string;
   date: string;
   content: string;
+  contents?: string;
   location: string | null;
   type: string | null;
   cover: {
@@ -172,15 +174,19 @@ export default function EventsPage({
   }
 
   // 格式化日期显示
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'N/A'
     try {
-      return new Date(dateString).toLocaleDateString(actualLanguage === 'zh-Hans' ? 'zh-CN' : 'en-US', {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'N/A'
+      return date.toLocaleDateString(actualLanguage === 'zh-Hans' ? 'zh-CN' : 'en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       })
     } catch (error) {
-      return dateString
+      console.error('Date formatting error:', error)
+      return 'N/A'
     }
   }
 
@@ -241,22 +247,22 @@ export default function EventsPage({
                         </div>
                         <div>
                           <span className="inline-block px-4 py-0.5 mb-6 text-xs font-medium leading-loose text-center text-white rounded-[5px] bg-primary">
-                            {formatDate(event.date)}
+                            {String(formatDate(event.date))}
                           </span>
                           <h3>
                             <Link
                               href={`/events/${event.documentId || event.id}`}
                               className={`inline-block mb-4 text-xl font-semibold text-dark dark:text-white hover:text-primary dark:hover:text-primary sm:text-2xl lg:text-xl xl:text-2xl article-title ${actualLanguage === 'zh-Hans' ? 'zh' : 'en'}`}
                             >
-                              {event.title}
+                              {String(event.title || 'Untitled Event')}
                             </Link>
                           </h3>
                           <p className={`max-w-[370px] text-base text-body-color dark:text-dark-6 mb-4 article-description ${actualLanguage === 'zh-Hans' ? 'zh' : 'en'}`}>
-                            {event.content}
+                            {String(event.contents || event.content || 'No description available')}
                           </p>
                           {event.location && (
                             <p className="text-sm text-body-color dark:text-dark-6 mb-2">
-                              📍 {event.location}
+                              📍 {String(event.location)}
                             </p>
                           )}
                         </div>
@@ -274,14 +280,7 @@ export default function EventsPage({
                 />
               </>
             ) : (
-              <div className="text-center py-20">
-                <h3 className="text-xl font-semibold text-dark dark:text-white mb-4">
-                  {getText('noEventsFound')}
-                </h3>
-                <p className="text-body-color dark:text-dark-6">
-                  {getText('noEventsDesc')}
-                </p>
-              </div>
+              <EmptyEvents />
             )}
           </div>
         </section>
@@ -308,7 +307,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const eventsPerPage = 12
     const totalPagesEn = Math.ceil(eventsEn.length / eventsPerPage)
     const totalPagesZh = Math.ceil(eventsZh.length / eventsPerPage)
-    const maxPages = Math.max(totalPagesEn, totalPagesZh)
+    const maxPages = Math.max(1, Math.max(totalPagesEn, totalPagesZh))
 
     console.log(`📄 分页计算:`, {
       eventsPerPage,
@@ -317,10 +316,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
       maxPages
     })
 
-    // 生成所有页面路径
+    // 生成所有页面路径，至少生成第一页
     const paths = []
     for (let page = 1; page <= maxPages; page++) {
       paths.push({ params: { page: page.toString() } })
+    }
+
+    // 如果没有数据，至少生成第一页
+    if (paths.length === 0) {
+      paths.push({ params: { page: '1' } })
     }
 
     console.log(`✅ 生成 ${paths.length} 个静态路径`)
@@ -362,14 +366,14 @@ export const getStaticProps: GetStaticProps<EventsPageProps> = async ({ params }
       return events.map((event: StrapiEvent, index: number) => ({
         id: event.id || index + 1,
         documentId: event.documentId || null,
-        title: event.title,
-        date: event.date,
-        content: event.content || '',
+        title: event.title || 'Untitled Event',
+        date: event.date || new Date().toISOString(),
+        content: event.contents || event.content || '',
         location: event.location || null,
         type: event.type || null,
         cover: event.cover ? {
-          url: event.cover.url,
-          alternativeText: event.cover.alternativeText || null
+          url: event.cover.url || '/images/blog/blog-01.jpg',
+          alternativeText: event.cover.alternativeText || event.title || 'Event cover'
         } : null
       }))
     }
@@ -415,7 +419,8 @@ export const getStaticProps: GetStaticProps<EventsPageProps> = async ({ params }
         totalPages: 1,
         totalEvents: 0,
         language: 'en'
-      }
+      },
+      revalidate: 60 // 1分钟后重新验证
     }
   }
 }

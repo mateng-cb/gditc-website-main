@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import { EmptyStandards } from '../../../components/EmptyState'
 import { getStandards } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
 
@@ -146,12 +147,19 @@ export default function ResourcesPage({
 
   // 格式化日期
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return ''
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    if (!dateString) return 'N/A'
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'N/A'
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      console.error('Date formatting error:', error)
+      return 'N/A'
+    }
   }
 
   return (
@@ -208,18 +216,18 @@ export default function ResourcesPage({
                         </div>
                         <div>
                           <span className="inline-block px-4 py-0.5 mb-6 text-xs font-medium leading-loose text-center text-white rounded-[5px] bg-primary">
-                            {formatDate(resource.publishDate)}
+                            {String(formatDate(resource.publishDate))}
                           </span>
                           <h3>
                             <Link
                               href={`/standards/${resource.documentId}`}
                               className="inline-block mb-4 text-xl font-semibold text-dark dark:text-white hover:text-primary dark:hover:text-primary sm:text-2xl lg:text-xl xl:text-2xl article-title"
                             >
-                              {resource.title}
+                              {String(resource.title || 'Untitled')}
                             </Link>
                           </h3>
                           <p className="max-w-[370px] text-base text-body-color dark:text-dark-6 mb-4 article-description">
-                            {resource.description}
+                            {String(resource.description || 'No description available')}
                           </p>
                           
                           {/* 下载按钮 */}
@@ -253,14 +261,7 @@ export default function ResourcesPage({
                 />
               </>
             ) : (
-              <div className="text-center py-20">
-                <h3 className="text-xl font-semibold text-dark dark:text-white mb-4">
-                  No Standards Found
-                </h3>
-                <p className="text-body-color dark:text-dark-6">
-                  Try selecting a different category or check back later for updates.
-                </p>
-              </div>
+              <EmptyStandards />
             )}
           </div>
         </section>
@@ -271,23 +272,38 @@ export default function ResourcesPage({
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
+    console.log('🔄 开始生成Standards分页路径...');
+    
     // 从API获取真实数据来计算总页数
-    const standards = await getStandards()
-    const resourcesPerPage = 12
-    const totalPages = Math.ceil(standards.length / resourcesPerPage)
+    const standards = await getStandards();
+    console.log(`📊 获取到 ${standards.length} 条Standards数据`);
+    
+    const resourcesPerPage = 12;
+    const totalPages = Math.max(1, Math.ceil(standards.length / resourcesPerPage));
+    
+    console.log(`📄 计算总页数: ${totalPages}`);
 
-    // 生成所有页面路径
-    const paths = []
+    // 生成所有页面路径，至少生成第一页
+    const paths = [];
     for (let page = 1; page <= totalPages; page++) {
-      paths.push({ params: { page: page.toString() } })
+      paths.push({ params: { page: page.toString() } });
     }
+
+    // 如果没有数据，至少生成第一页
+    if (paths.length === 0) {
+      paths.push({ params: { page: '1' } });
+    }
+
+    console.log(`✅ 生成 ${paths.length} 个路径:`, paths.map(p => p.params.page));
 
     return {
       paths,
       fallback: false
     }
   } catch (error) {
-    console.error('生成Standards分页路径失败:', error)
+    console.error('❌ 生成Standards分页路径失败:', error);
+    
+    // 即使出错也要确保至少有一页
     return {
       paths: [{ params: { page: '1' } }],
       fallback: false
@@ -297,32 +313,61 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async ({ params }) => {
   try {
-    const page = parseInt(params?.page as string) || 1
-    const resourcesPerPage = 12
+    console.log('🔄 开始生成Standards页面数据...');
+    console.log('📄 页面参数:', params);
+    
+    const page = parseInt(params?.page as string) || 1;
+    const resourcesPerPage = 12;
 
     // 从API获取真实数据
-    const standards = await getStandards()
+    const standards = await getStandards();
+    console.log(`📊 获取到 ${standards.length} 条Standards数据`);
     
     // 转换数据格式以匹配Resource接口
-    const allResources: Resource[] = standards.map((standard: any) => ({
-      id: standard.id,
-      documentId: standard.documentId,
-      type: standard.type || 'standard',
-      title: standard.title,
-      description: standard.content || standard.description || '',
-      downloadUrl: standard.attachments?.url || '#',
-      publishDate: standard.publishedAt || standard.createdAt,
-      fileSize: 'N/A',
-      format: 'PDF',
-      cover: standard.cover?.url || '/images/blog/blog-01.jpg'
-    }))
+    const allResources: Resource[] = standards.map((standard: any) => {
+      // 安全处理cover字段
+      let coverUrl = '/images/blog/blog-01.jpg';
+      if (standard.cover) {
+        if (typeof standard.cover === 'string') {
+          coverUrl = standard.cover;
+        } else if (standard.cover.url) {
+          coverUrl = standard.cover.url;
+        }
+      }
+
+      // 安全处理publishDate字段
+      let publishDate = new Date().toISOString();
+      if (standard.publishedAt) {
+        publishDate = standard.publishedAt;
+      } else if (standard.createdAt) {
+        publishDate = standard.createdAt;
+      }
+
+      return {
+        id: standard.id || Math.random().toString(),
+        documentId: standard.documentId || standard.id || Math.random().toString(),
+        type: standard.type || 'standard',
+        title: standard.title || 'Untitled Standard',
+        description: standard.content || standard.description || 'No description available',
+        downloadUrl: standard.attachments?.url || '#',
+        publishDate: publishDate,
+        fileSize: 'N/A',
+        format: 'PDF',
+        cover: coverUrl
+      };
+    });
+    
+    console.log(`📋 转换后资源数量: ${allResources.length}`);
     
     // 计算分页数据
-    const totalResources = allResources.length
-    const totalPages = Math.ceil(totalResources / resourcesPerPage)
-    const startIndex = (page - 1) * resourcesPerPage
-    const endIndex = startIndex + resourcesPerPage
-    const pageResources = allResources.slice(startIndex, endIndex)
+    const totalResources = allResources.length;
+    const totalPages = Math.max(1, Math.ceil(totalResources / resourcesPerPage));
+    const startIndex = (page - 1) * resourcesPerPage;
+    const endIndex = startIndex + resourcesPerPage;
+    const pageResources = allResources.slice(startIndex, endIndex);
+
+    console.log(`📄 第 ${page} 页数据: ${pageResources.length} 条记录`);
+    console.log(`📊 分页信息: 总计 ${totalResources} 条，共 ${totalPages} 页`);
 
     return {
       props: {
@@ -334,7 +379,7 @@ export const getStaticProps: GetStaticProps<ResourcesPageProps> = async ({ param
       }
     }
   } catch (error) {
-    console.error('生成Standards分页数据失败:', error)
+    console.error('❌ 生成Standards分页数据失败:', error);
     
     return {
       props: {
@@ -343,7 +388,8 @@ export const getStaticProps: GetStaticProps<ResourcesPageProps> = async ({ param
         totalPages: 1,
         totalResources: 0,
         language: 'en'
-      }
+      },
+      revalidate: 60 // 1分钟后重新验证
     }
   }
 }

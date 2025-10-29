@@ -283,7 +283,7 @@ export default function Home({ sectors, homeData }: HomeProps) {
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap -mx-4">
+          {/* <div className="flex flex-wrap -mx-4">
             <div className="w-full px-6 md:w-1/2 lg:w-1/3">
               <div className="mb-12 wow fadeInUp group" data-wow-delay=".1s">
                 <h4 className="mb-3 text-xl font-bold text-dark dark:text-white number">
@@ -314,13 +314,13 @@ export default function Home({ sectors, homeData }: HomeProps) {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
       {/* Team Section - 核心板块 */}
-      <section id="team" className="overflow-hidden bg-gray-1 pb-12 pt-20 dark:bg-dark-2 lg:pb-[90px] lg:pt-[120px]">
-        <div className="container px-4 mx-auto">
+      {/* <section id="team" className="overflow-hidden bg-gray-1 pb-12 pt-20 dark:bg-dark-2 lg:pb-[90px] lg:pt-[120px]"> */}
+        {/* <div className="container px-4 mx-auto">
           <div className="flex flex-wrap -mx-4">
             <div className="w-full px-4">
               <div className="mx-auto mb-[60px] max-w-[485px] text-center">
@@ -329,9 +329,9 @@ export default function Home({ sectors, homeData }: HomeProps) {
                 </h2>
               </div>
             </div>
-          </div>
+          </div> */}
           {/* Row 1 */}
-          <div className="flex flex-wrap justify-center -mx-4 sectorItem mb-8">
+          {/* <div className="flex flex-wrap justify-center -mx-4 sectorItem mb-8">
             <div className="w-full px-4 md:w-1/2 lg:w-1/3">
               <div className="px-5 pt-12 pb-10 mb-8 bg-white group rounded-xl shadow-testimonial dark:bg-dark dark:shadow-none transition-colors cursor-pointer h-[280px] flex flex-col items-center justify-center">
                 <div className="relative z-10 mx-auto mb-5 h-[120px] w-[120px]">
@@ -387,9 +387,9 @@ export default function Home({ sectors, homeData }: HomeProps) {
               </div>
             </div>
           </div>
-          
+           */}
           {/* Row 2 */}
-          <div className="flex flex-wrap justify-center -mx-4 sectorItem">
+          {/* <div className="flex flex-wrap justify-center -mx-4 sectorItem">
             <div className="w-full px-4 md:w-1/2 lg:w-1/3">
               <div className="px-5 pt-12 pb-10 mb-8 bg-white group rounded-xl shadow-testimonial dark:bg-dark dark:shadow-none transition-colors cursor-pointer h-[280px] flex flex-col items-center justify-center">
                 <div className="relative z-10 mx-auto mb-5 h-[120px] w-[120px]">
@@ -447,9 +447,9 @@ export default function Home({ sectors, homeData }: HomeProps) {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </div> */}
+        {/* </div> */}
+      {/* </section> */}
     </Layout>
   );
 }

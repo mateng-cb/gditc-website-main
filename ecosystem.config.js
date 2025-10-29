@@ -1,52 +1,55 @@
 module.exports = {
   apps: [
     {
-      name: 'ditc-auto-updater',
-      script: 'scripts/auto-update.js',
-      args: 'start',
-      cwd: './',
+      name: 'gditc-nextjs',
+      script: 'start-static-server.js',
+      cwd: process.cwd(),
+      env: {
+        PORT: 6001,
+        NODE_ENV: 'production'
+      },
       instances: 1,
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      env: {
-        NODE_ENV: 'production',
-        UPDATE_INTERVAL: '600000', // 10分钟
-        DEPLOY_COMMAND: 'npx wrangler deploy'
-      },
-      env_file: '.env.local',
-      env_development: {
-        NODE_ENV: 'development',
-        UPDATE_INTERVAL: '300000', // 5分钟用于测试
-        DEPLOY_COMMAND: 'echo "Development deploy"'
-      },
-      env_file: '.env.local',
-      log_file: './logs/auto-updater.log',
-      out_file: './logs/auto-updater-out.log',
-      error_file: './logs/auto-updater-error.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      merge_logs: true,
+      error_file: './logs/nextjs-error.log',
+      out_file: './logs/nextjs-out.log',
+      log_file: './logs/nextjs-combined.log',
       time: true
     },
     {
-      name: 'ditc-static-server',
-      script: 'scripts/serve-static.js',
-      args: '6001',
-      cwd: './',
+      name: 'gditc-updater',
+      script: 'scripts/enhanced-incremental-updater.js',
+      cwd: process.cwd(),
+      env: {
+        NODE_ENV: 'production'
+      },
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '512M',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 6001
-      },
-      log_file: './logs/static-server.log',
-      out_file: './logs/static-server-out.log',
-      error_file: './logs/static-server-error.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      merge_logs: true,
+      max_memory_restart: '500M',
+      error_file: './logs/updater-error.log',
+      out_file: './logs/updater-out.log',
+      log_file: './logs/updater-combined.log',
       time: true
+    },
+    {
+      name: 'gditc-daily-rebuilder',
+      script: 'scripts/daily-rebuilder.js',
+      cwd: process.cwd(),
+      env: {
+        NODE_ENV: 'production'
+      },
+      instances: 1,
+      autorestart: false,
+      watch: false,
+      max_memory_restart: '500M',
+      error_file: './logs/daily-rebuilder-error.log',
+      out_file: './logs/daily-rebuilder-out.log',
+      log_file: './logs/daily-rebuilder-combined.log',
+      time: true,
+      cron_restart: '0 2 * * *', // 每天凌晨2点执行
+      exec_mode: 'fork'
     }
   ]
 };

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import { EmptyCertifications } from '../../../components/EmptyState'
 import { getCertifications, Article } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
 
@@ -241,7 +242,7 @@ export default function NewsroomPage({
                             </Link>
                           </h3>
                           <p className="max-w-[370px] text-base text-body-color dark:text-dark-6 article-description">
-                            {extractTextFromContent(article.description || article.descript || article.content || '')}
+                            {extractTextFromContent(article.description || article.descript || article.contents || article.content || '')}
                           </p>
                         </div>
                       </div>
@@ -258,14 +259,7 @@ export default function NewsroomPage({
                 />
               </>
             ) : (
-              <div className="text-center py-20">
-                <h3 className="text-xl font-semibold text-dark dark:text-white mb-4">
-                  {getText('noNewsFound')}
-                </h3>
-                <p className="text-body-color dark:text-dark-6">
-                  {getText('noNewsDesc')}
-                </p>
-              </div>
+              <EmptyCertifications />
             )}
           </div>
         </section>
@@ -280,12 +274,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const articlesEn = await getCertifications(undefined, 'en')
 
     const articlesPerPage = 12
-    const totalPages = Math.ceil(articlesEn.length / articlesPerPage)
+    const totalPages = Math.max(1, Math.ceil(articlesEn.length / articlesPerPage))
 
-    // 生成所有页面路径
+    // 生成所有页面路径，至少生成第一页
     const paths = []
     for (let page = 1; page <= totalPages; page++) {
       paths.push({ params: { page: page.toString() } })
+    }
+
+    // 如果没有数据，至少生成第一页
+    if (paths.length === 0) {
+      paths.push({ params: { page: '1' } })
     }
 
     return {
@@ -317,7 +316,7 @@ export const getStaticProps: GetStaticProps<NewsroomPageProps> = async ({ params
         slug: article.slug || '',
         description: article.description || '',
         descript: article.descript || '',
-        content: article.content || '',
+        content: article.contents || article.content || '',
         cover: article.cover || null,
         author: article.author || null,
         category: article.category || null,

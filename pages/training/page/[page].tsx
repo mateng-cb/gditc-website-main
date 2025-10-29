@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import { EmptyTraining } from '../../../components/EmptyState'
 import { getTraining, Sector } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
 
@@ -243,14 +244,7 @@ export default function SectorsPage({
                 />
               </>
             ) : (
-              <div className="text-center py-20">
-                <h3 className="text-xl font-semibold text-dark dark:text-white mb-4">
-                  {getText('noSectorsFound')}
-                </h3>
-                <p className="text-body-color dark:text-dark-6">
-                  {getText('noSectorsDesc')}
-                </p>
-              </div>
+              <EmptyTraining />
             )}
           </div>
         </section>
@@ -265,12 +259,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const sectorsEn = await getTraining(undefined, 'en')
 
     const sectorsPerPage = 12
-    const totalPages = Math.ceil(sectorsEn.length / sectorsPerPage)
+    const totalPages = Math.max(1, Math.ceil(sectorsEn.length / sectorsPerPage))
 
-    // 生成所有页面路径
+    // 生成所有页面路径，至少生成第一页
     const paths = []
     for (let page = 1; page <= totalPages; page++) {
       paths.push({ params: { page: page.toString() } })
+    }
+
+    // 如果没有数据，至少生成第一页
+    if (paths.length === 0) {
+      paths.push({ params: { page: '1' } })
     }
 
     return {

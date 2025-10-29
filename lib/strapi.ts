@@ -105,6 +105,7 @@ export interface Article {
   description?: string;
   descript?: string;
   content?: string;
+  contents?: string;
   cover?: {
     id?: number;
     documentId?: string;
@@ -257,6 +258,7 @@ export interface Event {
   title: string;
   date: string;
   content: string;
+  contents?: string;
   location?: string;
   type?: string;
   cover?: {
@@ -415,10 +417,17 @@ export interface About {
   ConstitutionDownloadUrl?: StrapiFile;
 }
 
+export interface JoinusFileItem {
+  id: number;
+  title: string;
+  file: StrapiFile;
+}
+
 export interface Joinus {
   title: string;
   blocks?: any[];
   download?: StrapiFile;
+  fileslist?: JoinusFileItem[];
 }
 
 export interface BannerSwiper {
@@ -812,7 +821,7 @@ export const getTraining = async (type?: string, locale: string = 'en'): Promise
           documentId: sector.documentId,
           title: sector.title || '',
           date: sector.date || null,
-          content: sector.content || '',
+          content: sector.contents || sector.content || '',
           source: sector.source || null,
           descript: sector.descript || '',
           artcileId: sector.artcileId || null,
@@ -922,7 +931,7 @@ export const getEvents = async (limit?: number, locale: string = 'en'): Promise<
           documentId: event.documentId,
           title: event.attributes.title,
           date: event.attributes.date,
-          content: event.attributes.content,
+          content: event.attributes.contents || event.attributes.content,
           location: event.attributes.location,
           type: event.attributes.type,
           cover: event.attributes.cover,
@@ -937,7 +946,7 @@ export const getEvents = async (limit?: number, locale: string = 'en'): Promise<
           documentId: event.documentId,
           title: event.title,
           date: event.date,
-          content: event.content,
+          content: event.contents || event.content,
           location: event.location,
           type: event.type,
           cover: event.cover,
@@ -1004,7 +1013,7 @@ export const getStandards = async (type?: string): Promise<Resource[]> => {
           id: resource.id,
           documentId: resource.documentId,
           title: resource.attributes.title,
-          content: resource.attributes.content,
+          content: resource.attributes.contents || resource.attributes.content,
           type: resource.attributes.type,
           cover: resource.attributes.cover,
           attachments: resource.attributes.attachments,
@@ -1018,7 +1027,7 @@ export const getStandards = async (type?: string): Promise<Resource[]> => {
           id: resource.id,
           documentId: resource.documentId,
           title: resource.title,
-          content: resource.content,
+          content: resource.contents || resource.content,
           type: resource.type,
           cover: resource.cover,
           attachments: resource.attachments,
@@ -1085,10 +1094,10 @@ export const getAbout = async (): Promise<About | null> => {
 export const getJoinus = async (): Promise<Joinus | null> => {
   try {
     console.log('🤝 Starting getJoinus API call...');
-    console.log('🌐 API URL:', strapiAPI.defaults.baseURL + '/joinus?populate=*');
+    console.log('🌐 API URL:', strapiAPI.defaults.baseURL + '/joinus?populate[fileslist][populate]=*');
     
     const response = await strapiAPI.get<StrapiSingleResponse<Joinus>>(
-      '/joinus?populate=*'
+      '/joinus?populate[fileslist][populate]=*'
     );
     
     console.log('✅ Joinus API response status:', response.status);
@@ -1098,6 +1107,8 @@ export const getJoinus = async (): Promise<Joinus | null> => {
       console.log('🤝 Joinus data found:');
       console.log('  - Title:', joinusData.title);
       console.log('  - Has download:', !!joinusData.download);
+      console.log('  - Has fileslist:', !!joinusData.fileslist);
+      console.log('  - Fileslist count:', joinusData.fileslist?.length || 0);
       
       // 打印下载文件信息
       if (joinusData.download) {
@@ -1105,6 +1116,14 @@ export const getJoinus = async (): Promise<Joinus | null> => {
         console.log(`  - Download URL: ${joinusData.download.url}`);
         console.log(`  - File type: ${joinusData.download.ext} (${joinusData.download.mime})`);
         console.log(`  - File size: ${joinusData.download.size} KB`);
+      }
+      
+      // 打印文件列表信息
+      if (joinusData.fileslist && joinusData.fileslist.length > 0) {
+        console.log('  - Fileslist items:');
+        joinusData.fileslist.forEach((item, index) => {
+          console.log(`    ${index + 1}. ${item.title}: ${item.file.name} (${item.file.ext})`);
+        });
       }
     } else {
       console.log('❌ No joinus data in response');
@@ -1232,7 +1251,7 @@ export const getCertifications = async (limit?: number, locale: string = 'en'): 
           slug: news.attributes.slug,
           description: news.attributes.description,
           descript: news.attributes.descript,
-          content: news.attributes.content,
+          content: news.attributes.contents || news.attributes.content,
           cover: news.attributes.cover,
           author: news.attributes.author,
           category: news.attributes.category,
@@ -1249,7 +1268,7 @@ export const getCertifications = async (limit?: number, locale: string = 'en'): 
           slug: news.slug,
           description: news.description,
           descript: news.descript,
-          content: news.content,
+          content: news.contents || news.content,
           cover: news.cover,
           author: news.author,
           category: news.category,

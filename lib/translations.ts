@@ -438,8 +438,8 @@ export const translations: { [key: string]: Translations } = {
       aiSummitSubtitle: 'Join us at the groundbreaking summit shaping the future of AI standardization',
     },
     homepage: {
-      featuresTitle: 'Practical solutions for real-world problems',
-      featuresDescription: 'ISO, the International Organization for Standardization, brings global experts together to agree on the best way of doing things – for anything from making a product to managing a process. As one of the oldest non-governmental international organizations, ISO has enabled trade and cooperation between people and companies all over the world since 1946. The International Standards published by ISO serve to make lives easier, safer and better.',
+      featuresTitle: 'VISION & MISSION',
+      featuresDescription: 'The Global Trust Framework for Digital Infrastructure—driving excellence, standardization, and collaboration to build a resilient, innovation,and inclusive global digital ecosystem.',
       stat1Description: 'International Standards and other deliverables covering almost all aspects of technology, management and manufacturing.',
       stat2Description: 'Members representing ISO in their country. There is only one member per country.',
       stat3Description: 'Technical committees and subcommittees to take care of standards development.',
