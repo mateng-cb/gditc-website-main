@@ -56,7 +56,7 @@ export default function About({ aboutData }: { aboutData: AboutData }) {
       />
       <Layout>
         {/* Banner Section */}
-        <div className="relative z-10 overflow-hidden pb-[60px] pt-[120px] dark:bg-dark md:pt-[130px] lg:pt-[160px]">
+        {/* <div className="relative z-10 overflow-hidden pb-[60px] pt-[120px] dark:bg-dark md:pt-[130px] lg:pt-[160px]">
           <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-stroke/0 via-stroke to-stroke/0 dark:via-dark-3"></div>
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap items-center -mx-4">
@@ -91,7 +91,7 @@ export default function About({ aboutData }: { aboutData: AboutData }) {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Who We Are Section */}
         <section className="bg-gray-1 pb-8 dark:bg-dark-2 lg:pb-[70px]">

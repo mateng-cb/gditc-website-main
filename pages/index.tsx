@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
@@ -117,6 +117,8 @@ export default function Home({ sectors, homeData }: HomeProps) {
           bottom: 0;
           background-size: cover;
           background-position: center;
+          background-repeat: no-repeat;
+          background-color: #f1f5f9; /* 浅灰色背景，让图片更突出 */
         }
         
         .hero-content {
@@ -268,6 +270,23 @@ export default function Home({ sectors, homeData }: HomeProps) {
         )}
       </div>
 
+      {/* About DITC Section */}
+      <section id="about-ditc" className="py-16 dark:bg-dark-2">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <h2 suppressHydrationWarning className="mb-6 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[36px] sm:leading-[1.2] text-center">
+            About DITC
+          </h2>
+          <div className="space-y-4 text-lg leading-relaxed text-body-color dark:text-dark-6">
+            <p>
+              The Digital Infrastructure Technical Council (DITC) is a global non-profit organization based in Singapore, focused on building a global digital infrastructure quality technology ecosystem. it provides quality technology ecosystem services centered around artificial intelligence infrastructure, covering Algorithm, Bigdata, Cloud, DataCenter, Network, Chips.
+            </p>
+            <p>
+              DITC with a global perspective, focusing on research, standard setting, and industry cooperation in digital infrastructure technology. This organization brings together experts from government, enterprises, research institutions, and other fields to jointly promote the construction and development of digital infrastructure, in order to promote the prosperity of the global digital economy.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section - 统计数据 */}
       <section className="pb-8 pt-20 dark:bg-dark lg:pb-[70px] lg:pt-[120px]" id="numberInfoBox">
         <div className="container px-4 mx-auto">
@@ -283,7 +302,7 @@ export default function Home({ sectors, homeData }: HomeProps) {
               </div>
             </div>
           </div>
-          {/* <div className="flex flex-wrap -mx-4">
+          <div className="flex flex-wrap -mx-4">
             <div className="w-full px-6 md:w-1/2 lg:w-1/3">
               <div className="mb-12 wow fadeInUp group" data-wow-delay=".1s">
                 <h4 className="mb-3 text-xl font-bold text-dark dark:text-white number">
@@ -314,7 +333,155 @@ export default function Home({ sectors, homeData }: HomeProps) {
                 </p>
               </div>
             </div>
-          </div> */}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Business Section */}
+      <section className="py-20 dark:bg-dark-2 lg:py-[0px]" style={{paddingBottom: '80px'}}>
+        <div className="container mx-auto px-4">
+          <div className="wow fadeInUp" data-wow-delay=".6s">
+            <h2 className="mb-8 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2] text-center">
+              {language === 'zh-Hans' ? '主营业务' : 'MAIN BUSINESS'}
+            </h2>
+
+            <div className="mb-12 text-center">
+              <p className="mx-auto max-w-4xl text-lg leading-relaxed text-body-color dark:text-dark-6">
+                {language === 'zh-Hans' 
+                  ? 'DITC 致力于数字基础设施技术发展，提供全方位的认证、培训、竞赛和会议服务'
+                  : 'DITC is committed to digital infrastructure technology development, providing comprehensive certification, training, competition, and conference services'
+                }
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Certification Business */}
+              <div className="p-8 bg-white dark:bg-dark rounded-lg shadow-lg border border-gray-200 dark:border-dark-3 hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out">
+                <div className="flex items-center mb-6">
+                  <div className="w-14 h-14 bg-primary rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-white font-bold text-xl">1</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-dark dark:text-white">
+                    {language === 'zh-Hans' ? '认证业务' : 'Certification Business'}
+                  </h3>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-body-color dark:text-dark-6 mb-4">
+                    {language === 'zh-Hans' 
+                      ? 'DITC的认证服务覆盖数据中心的设计、建设、运营维护和全流程管理。主要认证项目包括：'
+                      : 'DITC\'s certification services cover the design, construction, operation & maintenance, and full process management of data centers. Key certification programs include:'
+                    }
+                  </p>
+                  <ul className="space-y-2">
+                    {[
+                      language === 'zh-Hans' ? '数据中心服务能力认证' : 'Data Center Service Capability Certification',
+                      language === 'zh-Hans' ? '数据中心绿色评级认证' : 'Data Center Green Rating Certification',
+                      language === 'zh-Hans' ? '智能计算基础设施成熟度认证' : 'Intelligent Computing Infrastructure Maturity Certification',
+                      language === 'zh-Hans' ? '关键产品与解决方案认证' : 'Key Products & Solutions Certification'
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        <span className="text-body-color dark:text-dark-6">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Training Business */}
+              <div className="p-8 bg-white dark:bg-dark rounded-lg shadow-lg border border-gray-200 dark:border-dark-3 hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out">
+                <div className="flex items-center mb-6">
+                  <div className="w-14 h-14 bg-secondary rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-white font-bold text-xl">2</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-dark dark:text-white">
+                    {language === 'zh-Hans' ? '培训业务' : 'Training Business'}
+                  </h3>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-body-color dark:text-dark-6 mb-4">
+                    {language === 'zh-Hans' 
+                      ? 'DITC的培训体系贯穿数据中心全生命周期，从"规划、设计、建设"到"运营维护和优化"，涵盖从"基础技能和专业科技"到"管理能力和前沿洞察"的所有能力维度。包括：'
+                      : 'DITC\'s training system spans the entire data center lifecycle from "planning, design, and construction" to "operation & maintenance and optimization" and covers all competency dimensions, from "basic skills and professional technology" to "management capabilities and cutting-edge insights". Include:'
+                    }
+                  </p>
+                  <ul className="space-y-2">
+                    {[
+                      language === 'zh-Hans' ? '认证与标准解读' : 'Certification & Standard Interpretation',
+                      language === 'zh-Hans' ? '运营维护与管理' : 'Operation, Maintenance & Management',
+                      language === 'zh-Hans' ? '规划与设计' : 'Planning & Design',
+                      language === 'zh-Hans' ? '绿色能效与可持续发展' : 'Green Energy Efficiency & Sustainable Development',
+                      language === 'zh-Hans' ? '前沿技术与创新应用' : 'Cutting-Edge Technology & Innovative Applications',
+                      language === 'zh-Hans' ? '综合能力与软技能提升' : 'Comprehensive & Soft Skills Enhancement'
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="w-2 h-2 bg-secondary rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        <span className="text-body-color dark:text-dark-6">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* International Competition */}
+              <div className="p-8 bg-white dark:bg-dark rounded-lg shadow-lg border border-gray-200 dark:border-dark-3 hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out">
+                <div className="flex items-center mb-6">
+                  <div className="w-14 h-14 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-white font-bold text-xl">3</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-dark dark:text-white">
+                    {language === 'zh-Hans' ? '国际竞赛' : 'International Competition'}
+                  </h3>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-body-color dark:text-dark-6">
+                    {language === 'zh-Hans' 
+                      ? 'DITC国际竞赛旨在激发创新，推动全球数字基础设施发展的技术进步。通过竞争机制，鼓励企业和个人专家在AI、数据中心、网络等领域展示其最新研究成果和技术应用。竞赛涵盖从算法优化到数据处理能力的广泛挑战。'
+                      : 'DITC International Competitions aim to inspire innovation and drive technological advancement in global digital infrastructure development. Through a competitive mechanism, encouraging enterprises and individual experts to showcase their latest research achievements and technological applications in fields such as AI, data centers, and networks. Competitions cover a wide range of challenges, from algorithm optimization to data processing capabilities.'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Industry Conferences & Events */}
+              <div className="p-8 bg-white dark:bg-dark rounded-lg shadow-lg border border-gray-200 dark:border-dark-3 hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out">
+                <div className="flex items-center mb-6">
+                  <div className="w-14 h-14 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-white font-bold text-xl">4</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-dark dark:text-white">
+                    {language === 'zh-Hans' ? '产业大会与活动' : 'Industry Conferences & Events'}
+                  </h3>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-body-color dark:text-dark-6 mb-4">
+                    {language === 'zh-Hans' 
+                      ? 'DITC会议旨在构建行业交流平台，发布研究成果，推广最佳实践，促进产业合作，如：'
+                      : 'DITC conferences are designed to build industry exchange platforms, release research outcomes, promote best practices, and facilitate industrial cooperation, such as:'
+                    }
+                  </p>
+                  <ul className="space-y-2">
+                    {[
+                      language === 'zh-Hans' ? '专业技术研讨会' : 'Professional Technical Seminars',
+                      language === 'zh-Hans' ? '产业交流与协作交流' : 'Industrial Exchange & Collaborative Exchange',
+                      language === 'zh-Hans' ? '成果发布与培训会议' : 'Outcome Release & Training Sessions',
+                      language === 'zh-Hans' ? '高级别峰会' : 'Senior-Level Summits',
+                      language === 'zh-Hans' ? '国际交流会议' : 'International Exchange Conferences'
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        <span className="text-body-color dark:text-dark-6">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
