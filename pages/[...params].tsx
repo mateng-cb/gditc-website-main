@@ -143,10 +143,10 @@ export default function DetailPage({
       )}
 
       {/* Banner Section */}
-      <div className="relative z-10 overflow-hidden pb-[30px] pt-[100px] dark:bg-dark md:pt-[110px] lg:pt-[130px]">
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-stroke/0 via-stroke to-stroke/0 dark:via-dark-3"></div>
+      <div className="relative z-10 overflow-hidden pb-[10px] pt-[10px] dark:bg-dark md:pt-[10px] lg:pt-[20px]">
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-stroke/0 via-stroke to-stroke/0 dark:via-dark-3" style={{ display: 'none' }}></div>
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center -mx-4">
+          <div className="flex flex-wrap items-center -mx-4" style={{ display: 'none' }}>
             <div className="w-full px-4">
               <div className="text-center">
                 <h1 className="mb-4 text-3xl font-bold text-dark dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]">
@@ -158,40 +158,41 @@ export default function DetailPage({
                     : 'Learn more about DITC\'s latest news and insights'
                   }
                 </p>
-                <ul className="flex items-center justify-center gap-[10px]">
-                  <li>
-                    <a
-                      href={language === 'en' ? '/' : `/${language}`}
-                      className="flex items-center gap-[10px] text-base font-medium text-body-color dark:text-dark-6 hover:text-primary transition-colors"
-                    >
-                      {language === 'zh-Hans' ? '首页' : 'Home'}
-                    </a>
-                  </li>
-                  <li>
-                    <span className="text-body-color dark:text-dark-6"> / </span>
-                    <a 
-                      href={language === 'en' ? `/${channelType}` : `/${language}/${channelType}`}
-                      className="capitalize text-body-color dark:text-dark-6 hover:text-primary transition-colors"
-                    >
-                      {getChannelDisplayName(channelType)}
-                    </a>
-                  </li>
-                  <li>
-                    <span className="text-body-color dark:text-dark-6"> / </span>
-                    <span className="text-dark dark:text-white font-medium">
-                      {language === 'zh-Hans' ? '详情' : 'Details'}
-                    </span>
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
+          {/* 面包屑导航 - 左对齐 */}
+          <ul className="flex items-center gap-[10px] text-sm">
+            <li>
+              <a
+                href={language === 'en' ? '/' : `/${language}`}
+                className="text-body-color dark:text-dark-6 hover:text-primary transition-colors"
+              >
+                {language === 'zh-Hans' ? '首页' : 'Home'}
+              </a>
+            </li>
+            <li>
+              <span className="text-body-color dark:text-dark-6"> / </span>
+              <a 
+                href={language === 'en' ? `/${channelType}` : `/${language}/${channelType}`}
+                className="capitalize text-body-color dark:text-dark-6 hover:text-primary transition-colors"
+              >
+                {getChannelDisplayName(channelType)}
+              </a>
+            </li>
+            <li>
+              <span className="text-body-color dark:text-dark-6"> / </span>
+              <span className="text-dark dark:text-white font-medium">
+                {language === 'zh-Hans' ? '详情' : 'Details'}
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
 
       {/* Featured Image - 符合版心宽度，高度自适应 */}
       {content.cover && (
-        <div className="container mx-auto px-4 mb-[50px]">
+        <div className="container mx-auto px-4 mb-[50px]" style={{display: 'none'}}>
           <div className="wow fadeInUp relative z-20 overflow-hidden rounded-[5px]" data-wow-delay=".1s">
             <img
               src={content.cover}

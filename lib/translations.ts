@@ -712,8 +712,7 @@ export const translations: { [key: string]: Translations } = {
           description: 'Complete your application with required documents',
           items: [
             'Application Form (Download Template)',
-            'Institutional PPT (core technologies/roadmaps)',
-            'Sealed Membership Cooperation Agreement'
+            'Institution/Company Introduction Materials (core technologies/roadmaps)'
           ],
         },
         step2: {
@@ -726,12 +725,12 @@ export const translations: { [key: string]: Translations } = {
           ],
         },
         step3: {
-          title: 'Fee Payment',
-          description: 'Pay your annual membership fee',
+          title: 'Sign and Fee Payment',
+          description: 'Sign and Pay your annual membership fee',
           items: [
+            'Sign and stamp the membership cooperation agreement',
             'Annual fee via bank transfer',
-            'Cryptocurrency payment accepted',
-            'Secure payment processing'
+            'Cryptocurrency payment accepted & Secure payment processing'
           ],
         },
         step4: {
@@ -1139,8 +1138,7 @@ export const translations: { [key: string]: Translations } = {
           description: '完成申请所需文件',
           items: [
             '申请表（下载模板）',
-            '机构PPT（核心技术/路线图）',
-            '密封会员合作协议'
+            '机构/公司介绍材料（核心技术/路线图）'
           ],
         },
         step2: {
@@ -1153,12 +1151,12 @@ export const translations: { [key: string]: Translations } = {
           ],
         },
         step3: {
-          title: '费用支付',
-          description: '支付年度会员费',
+          title: '签署与费用支付',
+          description: '签署并支付年度会员费',
           items: [
+            '签署并盖章会员合作协议',
             '通过银行转账支付年费',
-            '接受加密货币支付',
-            '安全支付处理'
+            '接受加密货币支付 & 安全支付处理'
           ],
         },
         step4: {

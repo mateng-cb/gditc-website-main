@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { GetStaticProps } from 'next'
 import Layout from '../components/Layout'
 import SEOHead from '../components/SEOHead'
+import PageBanner from '../components/PageBanner'
 import { t, getTranslation } from '../lib/translations'
 import { getJoinus } from '../lib/strapi'
 import { useLanguage } from './_app'
@@ -115,23 +116,17 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
       />
       <Layout>
         {/* Banner */}
-        <div className="relative z-10 overflow-hidden pt-[120px] pb-[60px] md:pt-[130px] lg:pt-[160px] dark:bg-dark">
-          <div className="container mx-auto px-4">
-            <div className="text-center">
-              <h1 className="mb-4 text-3xl font-bold text-dark dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]">
-                {t(language, 'joinUs.howToJoin')}
-              </h1>
-              <p className="mb-8 text-lg text-body-color dark:text-dark-6 max-w-3xl mx-auto">
-                {t(language, 'joinUs.becomePartOf')}
-              </p>
-              <ul className="flex items-center justify-center gap-[10px]">
-                <li><a href="/" className="text-base font-medium text-dark dark:text-white">{t(language, 'common.home')}</a></li>
-                <li><span className="text-body-color dark:text-dark-6"> / </span></li>
-                <li><span className="text-base font-medium text-body-color">{t(language, 'joinUs.title')}</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <PageBanner
+          title={t(language, 'joinUs.howToJoin')}
+          description={t(language, 'joinUs.becomePartOf')}
+        >
+          {/* 面包屑导航 */}
+          <ul className="flex items-center justify-center gap-[10px]">
+            <li><a href="/" className="text-base font-medium text-dark dark:text-white">{t(language, 'common.home')}</a></li>
+            <li><span className="text-body-color dark:text-dark-6"> / </span></li>
+            <li><span className="text-base font-medium text-body-color">{t(language, 'joinUs.title')}</span></li>
+          </ul>
+        </PageBanner>
 
         {/* 4-Step Process */}
         <section className="py-20 lg:py-[120px] bg-gray-1 dark:bg-dark-2">
@@ -182,7 +177,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
 
             {/* CTA Buttons */}
             <div className="text-center mt-12 space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center" style={{display: 'none'}}>
                 <button className="inline-flex items-center px-8 py-4 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

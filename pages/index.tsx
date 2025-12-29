@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 import SEOHead from '../components/SEOHead';
 import OptimizedImage from '../components/OptimizedImage';
 import AnimatedNumber from '../components/AnimatedNumber';
-import { getTraining, getHome } from '../lib/strapi';
+import { getTraining, getHome, getEvents } from '../lib/strapi';
 import { t } from '../lib/translations';
 import { useLanguage } from './_app';
 
@@ -61,6 +61,17 @@ interface BannerSwiperItem {
   };
 }
 
+interface EventItem {
+  id: number;
+  documentId: string | null;
+  title: string;
+  date: string;
+  cover?: {
+    url: string;
+    alternativeText?: string;
+  } | null;
+}
+
 interface HomeProps {
   sectors: {
     en: Sector[];
@@ -71,9 +82,10 @@ interface HomeProps {
     blocks?: any[];
     bannerSwiper?: BannerSwiperItem[];
   };
+  events?: EventItem[];
 }
 
-export default function Home({ sectors, homeData }: HomeProps) {
+export default function Home({ sectors, homeData, events = [] }: HomeProps) {
   const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
   
@@ -288,7 +300,7 @@ export default function Home({ sectors, homeData }: HomeProps) {
       </section>
 
       {/* Features Section - 统计数据 */}
-      <section className="pb-8 pt-20 dark:bg-dark lg:pb-[70px] lg:pt-[120px]" id="numberInfoBox">
+      <section className="pb-8 pt-20 dark:bg-dark lg:pb-[70px] lg:pt-[120px]" id="numberInfoBox" style={{display: 'none'}}>
         <div className="container px-4 mx-auto">
           <div className="flex flex-wrap -mx-4">
             <div className="w-full px-4">
@@ -337,8 +349,58 @@ export default function Home({ sectors, homeData }: HomeProps) {
         </div>
       </section>
 
+      {/* Events Recommendation Section */}
+      {events && events.length > 0 && (
+        <section className="py-16 bg-gray-1 dark:bg-dark-2">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-dark dark:text-white sm:text-[36px]">
+                {language === 'zh-Hans' ? '活动推荐' : 'Events'}
+              </h2>
+              <Link 
+                href="/events" 
+                className="text-primary hover:text-primary/80 font-medium flex items-center"
+              >
+                {language === 'zh-Hans' ? '查看全部' : 'View All'}
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {events.slice(0, 4).map((event) => (
+                <div key={event.documentId || event.id} className="bg-white dark:bg-dark rounded-lg shadow-lg overflow-hidden group hover:shadow-xl transition-shadow">
+                  <Link href={`/events/${event.documentId || event.id}`} className="block">
+                    <div className="overflow-hidden h-48">
+                      <img
+                        src={event.cover?.url || '/images/blog/blog-01.jpg'}
+                        alt={event.cover?.alternativeText || event.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <span className="inline-block px-3 py-1 mb-3 text-xs font-medium text-white rounded bg-primary">
+                        {new Date(event.date).toLocaleDateString(language === 'zh-Hans' ? 'zh-CN' : 'en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                      <h3 className="text-lg font-semibold text-dark dark:text-white line-clamp-2 group-hover:text-primary transition-colors">
+                        {event.title}
+                      </h3>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Main Business Section */}
-      <section className="py-20 dark:bg-dark-2 lg:py-[0px]" style={{paddingBottom: '80px'}}>
+      <section className="dark:bg-dark-2 pt-[50px] pb-[80px]">
         <div className="container mx-auto px-4">
           <div className="wow fadeInUp" data-wow-delay=".6s">
             <h2 className="mb-8 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2] text-center">
@@ -626,15 +688,17 @@ export const getStaticProps: GetStaticProps = async () => {
     console.log('🔄 Starting getStaticProps for Home page...');
     
     // 并行获取所有数据
-    const [sectorsEn, sectorsZh, homeData] = await Promise.all([
+    const [sectorsEn, sectorsZh, homeData, eventsData] = await Promise.all([
       getTraining('Network', 'en'),
       getTraining('Network', 'zh-Hans'),
-      getHome()
+      getHome(),
+      getEvents(4, 'en') // 获取前4条活动
     ]);
 
     console.log('✅ Sectors EN count:', sectorsEn?.length || 0);
     console.log('✅ Sectors ZH count:', sectorsZh?.length || 0);
     console.log('🏠 Home data received:', !!homeData);
+    console.log('📅 Events count:', eventsData?.length || 0);
     
     if (homeData) {
       console.log('🏠 Home data details:');
@@ -659,6 +723,20 @@ export const getStaticProps: GetStaticProps = async () => {
       })) || [];
     };
 
+    // 清理 events 数据
+    const cleanEvents = (events: any[]) => {
+      return events?.map(event => ({
+        id: event.id,
+        documentId: event.documentId || null,
+        title: event.title || 'Untitled Event',
+        date: event.date || new Date().toISOString(),
+        cover: event.cover ? {
+          url: event.cover.url || '/images/blog/blog-01.jpg',
+          alternativeText: event.cover.alternativeText || event.title
+        } : null
+      })) || [];
+    };
+
     return {
       props: {
         sectors: {
@@ -666,6 +744,7 @@ export const getStaticProps: GetStaticProps = async () => {
           'zh-Hans': cleanSectors(sectorsZh)
         },
         homeData: homeData || null,
+        events: cleanEvents(eventsData),
       }
     };
   } catch (error) {
@@ -677,6 +756,7 @@ export const getStaticProps: GetStaticProps = async () => {
           'zh-Hans': []
         },
         homeData: null,
+        events: [],
       }
     };
   }

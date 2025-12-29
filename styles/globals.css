@@ -45,6 +45,16 @@
 }
 
 @layer components {
+  /* 二级页面统一的 Banner 区域样式 */
+  .page-banner {
+    @apply hidden; /* 隐藏整个 banner，删除此行即可恢复显示 */
+    @apply relative z-10 overflow-hidden dark:bg-dark;
+    /* 响应式顶部边距: 移动端 80px, 平板 90px, 桌面 100px */
+    @apply pt-[80px] pb-[40px];
+    @apply md:pt-[30px] md:pb-[0px];
+    @apply lg:pt-[50px] lg:pb-[0px];
+  }
+
   .line-clamp-2 {
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;

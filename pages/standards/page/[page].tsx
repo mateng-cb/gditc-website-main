@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import PageBanner from '../../../components/PageBanner'
 import { EmptyStandards } from '../../../components/EmptyState'
 import { getStandards } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
@@ -171,30 +172,18 @@ export default function ResourcesPage({
       />
       <Layout>
         {/* Banner */}
-        <div className="relative z-10 overflow-hidden pt-[120px] pb-[60px] md:pt-[130px] lg:pt-[160px] dark:bg-dark">
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-stroke/0 via-stroke dark:via-dark-3 to-stroke/0"></div>
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap items-center -mx-4">
-              <div className="w-full px-4">
-                <div className="text-center">
-                  <h1 className="mb-4 text-3xl font-bold text-dark dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]">
-                    Standards
-                  </h1>
-                  <p className="mb-5 text-base text-body-color dark:text-dark-6">
-                    Explore our digital infrastructure standards and technical specifications
-                  </p>
-
-                  {/* 标准统计信息 */}
-                  {totalResources > 0 && (
-                    <div className="mb-6 text-sm text-body-color dark:text-dark-6">
-                      Showing {startIndex}-{endIndex} of {totalResources} Standards
-                    </div>
-                  )}
-                </div>
-              </div>
+        <PageBanner
+          title="Standards"
+          description="Explore our digital infrastructure standards and technical specifications"
+          showDivider
+        >
+          {/* 标准统计信息 */}
+          {totalResources > 0 && (
+            <div className="mb-6 text-sm text-body-color dark:text-dark-6">
+              Showing {startIndex}-{endIndex} of {totalResources} Standards
             </div>
-          </div>
-        </div>
+          )}
+        </PageBanner>
 
         {/* Resources Grid */}
         <section className="pt-20 pb-10 lg:pt-[120px] lg:pb-20 dark:bg-dark">
@@ -227,7 +216,7 @@ export default function ResourcesPage({
                             </Link>
                           </h3>
                           <p className="max-w-[370px] text-base text-body-color dark:text-dark-6 mb-4 article-description">
-                            {String(resource.description || 'No description available')}
+                            {/* {String(resource.description || 'No description available')} */}
                           </p>
                           
                           {/* 下载按钮 */}

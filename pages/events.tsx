@@ -31,17 +31,14 @@ export default function Events() {
         description={getText('description')}
       />
       <Layout>
-        <div className="relative z-10 overflow-hidden pt-[120px] pb-[60px] md:pt-[130px] lg:pt-[160px] dark:bg-dark">
+        {/* 重定向加载页面 - 不使用 page-banner 类避免被隐藏 */}
+        <div className="relative z-10 overflow-hidden pt-[120px] pb-[60px] dark:bg-dark">
           <div className="container mx-auto px-4">
-            <div className="flex flex-wrap items-center -mx-4">
-              <div className="w-full px-4">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-body-color dark:text-dark-6">
-                    {getText('redirecting')}
-                  </p>
-                </div>
-              </div>
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-body-color dark:text-dark-6">
+                {getText('redirecting')}
+              </p>
             </div>
           </div>
         </div>

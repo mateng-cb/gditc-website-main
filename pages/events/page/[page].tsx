@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import PageBanner from '../../../components/PageBanner'
 import { EmptyEvents } from '../../../components/EmptyState'
 import { getEvents, Event as StrapiEvent } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
@@ -13,14 +14,37 @@ interface Event {
   documentId: string | null;
   title: string;
   date: string;
-  content: string;
-  contents?: string;
+  content: any; // 可能是字符串或 Strapi blocks 数组
+  contents?: any; // 可能是字符串或 Strapi blocks 数组
   location: string | null;
   type: string | null;
   cover: {
     url: string;
     alternativeText: string | null;
   } | null;
+}
+
+// 从 Strapi blocks 格式提取纯文本
+const extractTextFromBlocks = (content: any): string => {
+  // 如果是字符串，直接返回
+  if (typeof content === 'string') {
+    return content;
+  }
+  
+  // 如果是数组（blocks 格式），提取文本
+  if (Array.isArray(content)) {
+    return content.map((block: any) => {
+      if (block.children && Array.isArray(block.children)) {
+        return block.children
+          .map((child: any) => child.text || '')
+          .join('');
+      }
+      return '';
+    }).join(' ').trim();
+  }
+  
+  // 其他情况返回默认文本
+  return 'No description available';
 }
 
 interface EventsPageProps {
@@ -199,36 +223,24 @@ export default function EventsPage({
       />
       <Layout>
         {/* Banner Section */}
-        <div className="relative z-10 overflow-hidden pt-[120px] pb-[60px] md:pt-[130px] lg:pt-[160px] dark:bg-dark">
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-stroke/0 via-stroke dark:via-dark-3 to-stroke/0"></div>
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap items-center -mx-4">
-              <div className="w-full px-4">
-                <div className="text-center">
-                  <h1 className="mb-4 text-3xl font-bold text-dark dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]">
-                    {getText('title')}
-                  </h1>
-                  <p className="mb-5 text-base text-body-color dark:text-dark-6">
-                    {getText('description')}
-                  </p>
-
-                  {/* 活动统计信息 */}
-                  {totalEvents > 0 && (
-                    <div className="mb-6 text-sm text-body-color dark:text-dark-6">
-                      {actualLanguage === 'zh-Hans' 
-                        ? `共 ${totalEvents} 个活动 | 显示 ${startIndex}-${endIndex} 个`
-                        : `Showing ${startIndex}-${endIndex} of ${totalEvents} Events`
-                      }
-                    </div>
-                  )}
-                </div>
-              </div>
+        <PageBanner
+          title={getText('title')}
+          description={getText('description')}
+          showDivider
+        >
+          {/* 活动统计信息 */}
+          {totalEvents > 0 && (
+            <div className="mb-6 text-sm text-body-color dark:text-dark-6">
+              {actualLanguage === 'zh-Hans' 
+                ? `共 ${totalEvents} 个活动 | 显示 ${startIndex}-${endIndex} 个`
+                : `Showing ${startIndex}-${endIndex} of ${totalEvents} Events`
+              }
             </div>
-          </div>
-        </div>
+          )}
+        </PageBanner>
 
         {/* Events List */}
-        <section className="pt-20 pb-10 lg:pt-[120px] lg:pb-20 dark:bg-dark">
+        <section className="pt-20 pb-10 lg:pt-[35px] lg:pb-20 dark:bg-dark">
           <div className="container mx-auto px-4">
             {events.length > 0 ? (
               <>
@@ -258,7 +270,7 @@ export default function EventsPage({
                             </Link>
                           </h3>
                           <p className={`max-w-[370px] text-base text-body-color dark:text-dark-6 mb-4 article-description ${actualLanguage === 'zh-Hans' ? 'zh' : 'en'}`}>
-                            {String(event.contents || event.content || 'No description available')}
+                            {/* {extractTextFromBlocks(event.contents || event.content)} */}
                           </p>
                           {event.location && (
                             <p className="text-sm text-body-color dark:text-dark-6 mb-2">

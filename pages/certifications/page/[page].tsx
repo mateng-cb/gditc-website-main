@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../../components/Layout'
 import SEOHead from '../../../components/SEOHead'
+import PageBanner from '../../../components/PageBanner'
 import { EmptyCertifications } from '../../../components/EmptyState'
 import { getCertifications, Article } from '../../../lib/strapi'
 import { useLanguage } from '../../_app'
@@ -179,30 +180,18 @@ export default function NewsroomPage({
       />
       <Layout>
         {/* Banner Section */}
-        <div className="relative z-10 overflow-hidden pt-[120px] pb-[60px] md:pt-[130px] lg:pt-[160px] dark:bg-dark">
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-stroke/0 via-stroke dark:via-dark-3 to-stroke/0"></div>
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap items-center -mx-4">
-              <div className="w-full px-4">
-                <div className="text-center">
-                  <h1 className="mb-4 text-3xl font-bold text-dark dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]">
-                    {getText('title')}
-                  </h1>
-                  <p className="mb-5 text-base text-body-color dark:text-dark-6">
-                    {getText('description')}
-                  </p>
-
-                  {/* 认证统计信息 */}
-                  {totalArticles > 0 && (
-                    <div className="mb-6 text-sm text-body-color dark:text-dark-6">
-                      {getText('showingResults')} {startIndex}-{endIndex} of {totalArticles} {getText('totalArticles')}
-                    </div>
-                  )}
-                </div>
-              </div>
+        <PageBanner
+          title={getText('title')}
+          description={getText('description')}
+          showDivider
+        >
+          {/* 认证统计信息 */}
+          {totalArticles > 0 && (
+            <div className="mb-6 text-sm text-body-color dark:text-dark-6">
+              {getText('showingResults')} {startIndex}-{endIndex} of {totalArticles} {getText('totalArticles')}
             </div>
-          </div>
-        </div>
+          )}
+        </PageBanner>
 
         {/* News List */}
         <section className="pt-20 pb-10 lg:pt-[120px] lg:pb-20 dark:bg-dark">

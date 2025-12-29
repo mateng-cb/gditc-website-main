@@ -94,7 +94,7 @@ export default function About({ aboutData }: { aboutData: AboutData }) {
         </div> */}
 
         {/* Who We Are Section */}
-        <section className="bg-gray-1 pb-8 dark:bg-dark-2 lg:pb-[70px]">
+        <section className="bg-gray-1 pb-8 pt-[50px] dark:bg-dark-2 lg:pb-[70px]">
           <div className="container mx-auto px-4">
             <div className="wow fadeInUp" data-wow-delay=".2s">
               <div className="flex flex-wrap -mx-4">
