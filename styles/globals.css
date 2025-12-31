@@ -249,6 +249,31 @@
     /* 允许内联样式生效 */
   }
 
+  /* 修复 white-space: pre 导致长文本不换行的问题 */
+  .prose [style*="white-space"],
+  .prose span[style*="white-space:pre"],
+  .prose [data-slate-fragment] {
+    white-space: pre-wrap !important;  /* 保留空白但允许换行 */
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* 确保所有 prose 内容都能正确换行 */
+  .prose {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .prose p,
+  .prose span,
+  .prose div {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
   /* CKEditor 高亮标记样式 */
   .prose .marker-yellow,
   .prose mark.marker-yellow {
