@@ -66,7 +66,10 @@ export interface DetailContent {
   title: string;
   slug?: string;
   description?: string;
-  contents: BlockContent[];
+  // 旧字段：blocks 格式的内容
+  contents: BlockContent[] | string | null;
+  // 新字段：CKEditor HTML 格式的内容（方案B：两个字段共存）
+  content_html?: string | null;
   locale: string;
   createdAt: string;
   updatedAt: string;

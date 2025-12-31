@@ -231,6 +231,156 @@
     background: #252A42;
     color: #E2E8F0;
   }
+
+  /* ========================================
+   * CKEditor HTML 内容样式支持
+   * 支持 CKEditor 输出的带颜色和样式的 HTML
+   * ======================================== */
+  
+  /* 确保内联样式（如 style="color: ..."）能正常显示 */
+  .prose [style*="color"] {
+    /* 允许覆盖默认颜色 */
+    color: inherit;
+  }
+
+  .prose span[style],
+  .prose p[style],
+  .prose div[style] {
+    /* 允许内联样式生效 */
+  }
+
+  /* CKEditor 高亮标记样式 */
+  .prose .marker-yellow,
+  .prose mark.marker-yellow {
+    background-color: #fdfd77 !important;
+    padding: 0 2px;
+  }
+
+  .prose .marker-green,
+  .prose mark.marker-green {
+    background-color: #62f962 !important;
+    padding: 0 2px;
+  }
+
+  .prose .marker-pink,
+  .prose mark.marker-pink {
+    background-color: #fc7899 !important;
+    padding: 0 2px;
+  }
+
+  .prose .marker-blue,
+  .prose mark.marker-blue {
+    background-color: #72ccfd !important;
+    padding: 0 2px;
+  }
+
+  /* CKEditor 笔标记样式 */
+  .prose .pen-red,
+  .prose mark.pen-red {
+    color: #e91313 !important;
+    background-color: transparent;
+  }
+
+  .prose .pen-green,
+  .prose mark.pen-green {
+    color: #118800 !important;
+    background-color: transparent;
+  }
+
+  /* CKEditor 表格样式 */
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+  }
+
+  .prose table th,
+  .prose table td {
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem;
+    text-align: left;
+  }
+
+  .prose table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+  }
+
+  .dark .prose table th,
+  .dark .prose table td {
+    border-color: #374151;
+  }
+
+  .dark .prose table th {
+    background-color: #1f2937;
+  }
+
+  /* CKEditor 图片样式 */
+  .prose figure {
+    margin: 2rem 0;
+  }
+
+  .prose figure img {
+    margin: 0;
+    display: block;
+  }
+
+  .prose figure.image-style-side {
+    float: right;
+    max-width: 50%;
+    margin: 0 0 1rem 1.5rem;
+  }
+
+  .prose figure.image-style-align-left {
+    float: left;
+    margin: 0 1.5rem 1rem 0;
+  }
+
+  .prose figure.image-style-align-right {
+    float: right;
+    margin: 0 0 1rem 1.5rem;
+  }
+
+  .prose figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  .dark .prose figcaption {
+    color: #9ca3af;
+  }
+
+  /* 清除浮动 */
+  .prose::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  /* CKEditor 删除线和下划线 */
+  .prose s,
+  .prose del {
+    text-decoration: line-through;
+    color: #6b7280;
+  }
+
+  .prose u {
+    text-decoration: underline;
+  }
+
+  /* CKEditor 水平线 */
+  .prose hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 2rem 0;
+  }
+
+  .dark .prose hr {
+    border-top-color: #374151;
+  }
 }
 
 @layer utilities {

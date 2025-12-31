@@ -14,7 +14,8 @@ interface DetailPageProps {
   initialContent: {
     title: string;
     description: string;
-    contents: BlockContent[] | string | null;
+    contents: BlockContent[] | string | null;  // 旧字段：blocks 格式
+    content_html?: string | null;               // 新字段：CKEditor HTML 格式
     locale: string;
     createdAt: string;
     cover?: string | null;
@@ -39,18 +40,31 @@ export default function DetailPage({
     return parseMarkdown(markdown);
   };
 
-  // 检查内容类型并处理
-  const isBlockContent = useMemo(() => {
-    return Array.isArray(content.contents);
-  }, [content.contents]);
+  // 方案B：优先使用 content_html（CKEditor 新内容），否则回退到 contents（blocks 旧内容）
+  const hasHtmlContent = useMemo(() => {
+    return !!(content.content_html && content.content_html.trim().length > 0);
+  }, [content.content_html]);
 
-  // 预处理正文：检测并转换 Markdown 语法（仅用于字符串内容）
+  // 检查旧内容类型
+  const isBlockContent = useMemo(() => {
+    return !hasHtmlContent && Array.isArray(content.contents);
+  }, [content.contents, hasHtmlContent]);
+
+  // 预处理正文：
+  // 1. 优先使用 content_html（新 CKEditor 内容）
+  // 2. 否则使用 contents（旧 blocks 或 Markdown 内容）
   const htmlContent = useMemo(() => {
+    // 优先使用新的 CKEditor HTML 内容
+    if (hasHtmlContent) {
+      return content.content_html || '';
+    }
+    
+    // 回退到旧的 contents 字段
     if (isBlockContent) return '';
     const raw = typeof content.contents === 'string' ? content.contents : '';
     const looksLikeMarkdown = isMarkdown(raw);
     return looksLikeMarkdown ? convertMarkdownToHtml(raw) : raw;
-  }, [content.contents, isBlockContent]);
+  }, [content.contents, content.content_html, isBlockContent, hasHtmlContent]);
 
   // 获取相关文章
   const currentLocale = language === 'zh-Hans' ? 'zh-Hans' : 'en';
@@ -69,6 +83,7 @@ export default function DetailPage({
               title: newContent.title || content.title,
               description: newContent.description || newContent.descript || content.description,
               contents: newContent.contents || content.contents,
+              content_html: newContent.content_html || content.content_html,  // 新字段
               locale: newContent.locale || currentLocale,
               createdAt: newContent.createdAt || content.createdAt,
               cover: newContent.cover?.url || content.cover,
@@ -85,7 +100,7 @@ export default function DetailPage({
 
       fetchContentForLanguage();
     }
-  }, [currentLocale, channelType, documentId, content.locale, content.title, content.description, content.contents, content.createdAt, content.cover]);
+  }, [currentLocale, channelType, documentId, content.locale, content.title, content.description, content.contents, content.content_html, content.createdAt, content.cover]);
 
   // 路由变化时重置内容
   useEffect(() => {
@@ -262,13 +277,23 @@ export default function DetailPage({
                 </p>
 
                 <div className="mb-10 wow fadeInUp" data-wow-delay=".1s">
-                  {content.contents ? (
+                  {/* 方案B：优先显示 content_html（CKEditor），否则显示 contents（blocks） */}
+                  {hasHtmlContent ? (
+                    // 新的 CKEditor HTML 内容
+                    <div 
+                      className="prose prose-lg max-w-none dark:prose-invert text-justify"
+                      dangerouslySetInnerHTML={{ __html: htmlContent }} 
+                      style={{ textAlign: 'justify', lineHeight: '1.7' }}
+                    />
+                  ) : content.contents ? (
                     isBlockContent ? (
+                      // 旧的 blocks 格式内容
                       <BlockRenderer 
                         blocks={content.contents as BlockContent[]} 
                         className="text-justify"
                       />
                     ) : (
+                      // 旧的字符串/Markdown 内容
                       <div 
                         className="prose prose-lg max-w-none dark:prose-invert text-justify"
                         dangerouslySetInnerHTML={{ __html: htmlContent }} 
@@ -644,6 +669,7 @@ export const getStaticProps: GetStaticProps<DetailPageProps> = async ({ params }
           title: content.title || 'Untitled',
           description: content.description || content.descript || '',
           contents: content.contents || null,
+          content_html: content.content_html || null,  // 新的 CKEditor HTML 字段
           locale: content.locale || 'en',
           createdAt: content.createdAt || new Date().toISOString(),
           cover: content.cover?.url || null,
