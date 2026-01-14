@@ -191,11 +191,51 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
         }
       `}</style>
       
-      {/* Hero Section - 轮播图 */}
+      {/* Hero Section - 视频背景（减去导航栏高度 96px） */}
+      <div className="relative h-[calc(100vh-96px)] overflow-hidden">
+        {/* 背景视频 */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/images/hero/hero-image.jpg"
+        >
+          {/* 视频文件放在 public/videos/ 目录下 */}
+          <source src="/videos/DITC.mp4" type="video/mp4" />
+          {/* 如果浏览器不支持视频，显示背景图 */}
+          Your browser does not support the video tag.
+        </video>
+        
+        {/* 半透明遮罩层 */}
+        <div className="absolute inset-0 bg-black/50"></div>
+        
+        {/* 内容层 */}
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+            {language === 'zh-Hans' ? '数字基础设施技术委员会' : 'Digital Infrastructure Technical Council'}
+          </h1>
+          <p className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-3xl mb-8 drop-shadow-md">
+            {language === 'zh-Hans' 
+              ? '构建全球数字基础设施质量技术生态系统' 
+              : 'Building a Global Digital Infrastructure Quality Technology Ecosystem'
+            }
+          </p>
+          {/* <Link 
+            href="/about" 
+            className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
+          >
+            {language === 'zh-Hans' ? '了解更多' : 'Learn More'}
+          </Link> */}
+        </div>
+      </div>
+
+      {/* ========== 原轮播图代码（已注释）========== */}
+      {/* 
       <div className="relative h-[600px] overflow-hidden">
         {bannerItems.length > 0 ? (
           <>
-            {/* 轮播图容器 */}
             <div className="relative w-full h-full">
               {bannerItems.map((item, index) => (
                 <div
@@ -227,7 +267,6 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
               ))}
             </div>
             
-            {/* 导航点 */}
             {bannerItems.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
                 {bannerItems.map((_, index) => (
@@ -242,7 +281,6 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
               </div>
             )}
             
-            {/* 左右箭头 */}
             {bannerItems.length > 1 && (
               <>
                 <button
@@ -265,7 +303,6 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
             )}
           </>
         ) : (
-          /* 默认轮播图 */
           <div className="hero-slide" style={{backgroundImage: "url('/images/hero/hero-image.jpg')"}}>
             <div className="hero-content">
               <h2 className="text-4xl font-bold mb-4">
@@ -281,6 +318,8 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
           </div>
         )}
       </div>
+      */}
+      {/* ========== 原轮播图代码结束 ========== */}
 
       {/* About DITC Section */}
       <section id="about-ditc" className="py-16 dark:bg-dark-2">
