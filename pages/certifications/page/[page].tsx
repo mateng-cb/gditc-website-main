@@ -193,8 +193,136 @@ export default function NewsroomPage({
           )}
         </PageBanner>
 
-        {/* News List */}
+        {/* Introduction Section */}
         <section className="pt-20 pb-10 lg:pt-[120px] lg:pb-20 dark:bg-dark">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="space-y-8 mb-12">
+              {/* Background of the certification project */}
+              <div>
+                <h2 className="text-2xl font-bold text-dark dark:text-white mb-4">
+                  Background of the certification project
+                </h2>
+                <p className="text-base leading-relaxed text-body-color dark:text-dark-6">
+                  DITC's data center certification business is developed and implemented by the Data Center Professional Committee. The committee is committed to promoting the quality improvement of global data center infrastructure and ensuring that data centers meet high technical, operational and security standards.
+                </p>
+              </div>
+
+              {/* Significance and value of certification */}
+              <div>
+                <h2 className="text-2xl font-bold text-dark dark:text-white mb-4">
+                  Significance and value of certification
+                </h2>
+                <p className="text-base leading-relaxed text-body-color dark:text-dark-6">
+                  Through DITC's Data Center Certification, enterprises can prove to their customers the high quality and reliability of their data center infrastructure. This will not only help to enhance market competitiveness, but also gain higher return on investment and customer trust, laying a solid foundation for business development.
+                </p>
+              </div>
+
+              {/* Mutual recognition and cooperation */}
+              <div>
+                <h2 className="text-2xl font-bold text-dark dark:text-white mb-4">
+                  Mutual recognition and cooperation
+                </h2>
+                <p className="text-base leading-relaxed text-body-color dark:text-dark-6">
+                  DITC maintains close cooperation with many international certification bodies such as CQC to promote international mutual recognition of certification results. DITC's data center certification not only meets local needs, but also has global recognition, providing strong support for enterprises to expand the international market.
+                </p>
+              </div>
+            </div>
+
+            {/* Certification Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 gap-y-40 md:gap-y-40 lg:gap-y-6 mt-48">
+              {/* Certification Card 1 */}
+              <div 
+                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+              >
+                <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
+                  <img
+                    src="/images/sjrz.png"
+                    alt="DITC Design Certification"
+                    className="w-full h-auto object-contain mx-auto"
+                  />
+                </div>
+                <div className="mt-24">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                    设计认证
+                  </h3>
+                  <p className="text-sm text-body-color dark:text-dark-6 text-center">
+                    DITC Design Certification
+                  </p>
+                </div>
+              </div>
+
+              {/* Certification Card 2 */}
+              <div 
+                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+              >
+                <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
+                  <img
+                    src="/images/jsrz.png"
+                    alt="DITC Construction Certification"
+                    className="w-full h-auto object-contain mx-auto"
+                  />
+                </div>
+                <div className="mt-24">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                    建设认证
+                  </h3>
+                  <p className="text-sm text-body-color dark:text-dark-6 text-center">
+                    DITC Construction Certification
+                  </p>
+                </div>
+              </div>
+
+              {/* Certification Card 3 */}
+              <div 
+                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+              >
+                <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
+                  <img
+                    src="/images/ywrz.png"
+                    alt="DITC oprations and maintenance Certification"
+                    className="w-full h-auto object-contain mx-auto"
+                  />
+                </div>
+                <div className="mt-24">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                    运维认证
+                  </h3>
+                  <p className="text-sm text-body-color dark:text-dark-6 text-center">
+                  DITC oprations and maintenance Certification
+                  </p>
+                </div>
+              </div>
+
+              {/* Certification Card 4 */}
+              <div 
+                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+              >
+                <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
+                  <img
+                    src="/images/jcssrz.png"
+                    alt="DITC End-to-End Infrastructure Certification"
+                    className="w-full h-auto object-contain mx-auto"
+                  />
+                </div>
+                <div className="mt-24">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                  基础设施全流程认证
+                  </h3>
+                  <p className="text-sm text-body-color dark:text-dark-6 text-center">
+                  DITC End-to-End Infrastructure Certification
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* News List */}
+        <section className="pt-20 pb-10 lg:pt-[120px] lg:pb-20 dark:bg-dark" style={{display: 'none'}}>
           <div className="container mx-auto px-4">
             {articles.length > 0 ? (
               <>

@@ -110,6 +110,23 @@ class EnhancedIncrementalUpdater {
     };
   }
 
+  // 生成列表数据的指纹，检测每条记录的修改
+  generateListFingerprint(listData) {
+    if (!Array.isArray(listData)) return null;
+    
+    // 为每条记录生成指纹：id + updatedAt
+    // 这样任何修改（文本、图片、排序等）都会被检测到
+    return listData.map(item => ({
+      id: item.id,
+      updatedAt: item.updatedAt,
+      // 可选：如果担心某些字段变化但 updatedAt 没变，可以加上这些关键字段
+      // 但通常 Strapi 会在修改时更新 updatedAt
+    })).sort((a, b) => {
+      // 按 id 排序，确保顺序一致
+      return (a.id || 0) - (b.id || 0);
+    });
+  }
+
   async checkForUpdates() {
     if (this.isUpdating) {
       this.log('正在更新中，跳过本次检查');
@@ -193,11 +210,12 @@ class EnhancedIncrementalUpdater {
         home: this.generateDataFingerprint(newData.home),
         about: this.generateDataFingerprint(newData.about),
         joinus: this.generateDataFingerprint(newData.joinus),
-        events: newData.events.length,
-        certifications: newData.certifications.length,
-        standards: newData.standards.length,
-        trainingEn: newData.trainingEn.length,
-        trainingZh: newData.trainingZh.length,
+        // 使用列表指纹而不是只比较长度，这样可以检测到任何修改
+        events: this.generateListFingerprint(newData.events),
+        certifications: this.generateListFingerprint(newData.certifications),
+        standards: this.generateListFingerprint(newData.standards),
+        trainingEn: this.generateListFingerprint(newData.trainingEn),
+        trainingZh: this.generateListFingerprint(newData.trainingZh),
       };
 
       // 生成缓存数据的指纹
@@ -205,34 +223,63 @@ class EnhancedIncrementalUpdater {
         home: this.generateDataFingerprint(cachedData.home),
         about: this.generateDataFingerprint(cachedData.about),
         joinus: this.generateDataFingerprint(cachedData.joinus),
-        events: cachedData.events.length,
-        certifications: cachedData.certifications.length,
-        standards: cachedData.standards.length,
-        trainingEn: cachedData.trainingEn?.length || 0,
-        trainingZh: cachedData.trainingZh?.length || 0,
+        // 使用列表指纹而不是只比较长度
+        events: this.generateListFingerprint(cachedData.events || []),
+        certifications: this.generateListFingerprint(cachedData.certifications || []),
+        standards: this.generateListFingerprint(cachedData.standards || []),
+        trainingEn: this.generateListFingerprint(cachedData.trainingEn || []),
+        trainingZh: this.generateListFingerprint(cachedData.trainingZh || []),
       };
 
-      // 检查指纹变化
+      // 检查指纹变化（现在列表数据也会检测到任何修改）
       const hasChanges = 
         !this.deepCompareObjects(newFingerprints.home, cachedFingerprints.home) ||
         !this.deepCompareObjects(newFingerprints.about, cachedFingerprints.about) ||
         !this.deepCompareObjects(newFingerprints.joinus, cachedFingerprints.joinus) ||
-        newFingerprints.events !== cachedFingerprints.events ||
-        newFingerprints.certifications !== cachedFingerprints.certifications ||
-        newFingerprints.standards !== cachedFingerprints.standards ||
-        newFingerprints.trainingEn !== cachedFingerprints.trainingEn ||
-        newFingerprints.trainingZh !== cachedFingerprints.trainingZh;
+        !this.deepCompareObjects(newFingerprints.events, cachedFingerprints.events) ||
+        !this.deepCompareObjects(newFingerprints.certifications, cachedFingerprints.certifications) ||
+        !this.deepCompareObjects(newFingerprints.standards, cachedFingerprints.standards) ||
+        !this.deepCompareObjects(newFingerprints.trainingEn, cachedFingerprints.trainingEn) ||
+        !this.deepCompareObjects(newFingerprints.trainingZh, cachedFingerprints.trainingZh);
 
       if (hasChanges) {
         this.log(`数据变化检测:`);
         this.log(`  Home: ${cachedFingerprints.home?.id || 'N/A'} -> ${newFingerprints.home?.id || 'N/A'}`);
         this.log(`  About: ${cachedFingerprints.about?.id || 'N/A'} -> ${newFingerprints.about?.id || 'N/A'}`);
-        this.log(`  Events: ${cachedFingerprints.events || 0} -> ${newFingerprints.events || 0}`);
-        this.log(`  Certifications: ${cachedFingerprints.certifications || 0} -> ${newFingerprints.certifications || 0}`);
-        this.log(`  Standards: ${cachedFingerprints.standards || 0} -> ${newFingerprints.standards || 0}`);
-        this.log(`  Training EN: ${cachedFingerprints.trainingEn || 0} -> ${newFingerprints.trainingEn || 0}`);
-        this.log(`  Training ZH: ${cachedFingerprints.trainingZh || 0} -> ${newFingerprints.trainingZh || 0}`);
         this.log(`  Join Us: ${cachedFingerprints.joinus?.id || 'N/A'} -> ${newFingerprints.joinus?.id || 'N/A'}`);
+        
+        // 检查列表数据变化（现在会显示详细的变化信息）
+        const eventsChanged = !this.deepCompareObjects(newFingerprints.events, cachedFingerprints.events);
+        const certificationsChanged = !this.deepCompareObjects(newFingerprints.certifications, cachedFingerprints.certifications);
+        const standardsChanged = !this.deepCompareObjects(newFingerprints.standards, cachedFingerprints.standards);
+        const trainingEnChanged = !this.deepCompareObjects(newFingerprints.trainingEn, cachedFingerprints.trainingEn);
+        const trainingZhChanged = !this.deepCompareObjects(newFingerprints.trainingZh, cachedFingerprints.trainingZh);
+        
+        if (eventsChanged) {
+          const oldCount = cachedFingerprints.events?.length || 0;
+          const newCount = newFingerprints.events?.length || 0;
+          this.log(`  📅 Events: ${oldCount} -> ${newCount} 条（检测到内容变化）`);
+        }
+        if (certificationsChanged) {
+          const oldCount = cachedFingerprints.certifications?.length || 0;
+          const newCount = newFingerprints.certifications?.length || 0;
+          this.log(`  🏆 Certifications: ${oldCount} -> ${newCount} 条（检测到内容变化）`);
+        }
+        if (standardsChanged) {
+          const oldCount = cachedFingerprints.standards?.length || 0;
+          const newCount = newFingerprints.standards?.length || 0;
+          this.log(`  📋 Standards: ${oldCount} -> ${newCount} 条（检测到内容变化）`);
+        }
+        if (trainingEnChanged) {
+          const oldCount = cachedFingerprints.trainingEn?.length || 0;
+          const newCount = newFingerprints.trainingEn?.length || 0;
+          this.log(`  🎓 Training EN: ${oldCount} -> ${newCount} 条（检测到内容变化）`);
+        }
+        if (trainingZhChanged) {
+          const oldCount = cachedFingerprints.trainingZh?.length || 0;
+          const newCount = newFingerprints.trainingZh?.length || 0;
+          this.log(`  🎓 Training ZH: ${oldCount} -> ${newCount} 条（检测到内容变化）`);
+        }
         
         // 特别检查首页swiper变化
         if (newFingerprints.home?.bannerSwiper && cachedFingerprints.home?.bannerSwiper) {
@@ -245,14 +292,6 @@ class EnhancedIncrementalUpdater {
             this.log(`    新轮播图数量: ${newFingerprints.home.bannerSwiper.length}`);
             this.log(`    旧轮播图数量: ${cachedFingerprints.home.bannerSwiper.length}`);
           }
-        }
-        
-        // 特别检查Training数据变化
-        if (newFingerprints.trainingEn !== cachedFingerprints.trainingEn || 
-            newFingerprints.trainingZh !== cachedFingerprints.trainingZh) {
-          this.log(`  🎓 Training数据发生变化！`);
-          this.log(`    英文Training: ${cachedFingerprints.trainingEn || 0} -> ${newFingerprints.trainingEn || 0}`);
-          this.log(`    中文Training: ${cachedFingerprints.trainingZh || 0} -> ${newFingerprints.trainingZh || 0}`);
         }
       }
 

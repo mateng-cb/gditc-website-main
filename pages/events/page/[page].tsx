@@ -253,7 +253,7 @@ export default function EventsPage({
                             <img
                               src={event.cover?.url || '/images/blog/blog-01.jpg'}
                               alt={event.cover?.alternativeText || event.title}
-                              className="w-full h-48 object-cover transition group-hover:rotate-6 group-hover:scale-125"
+                              className="w-full aspect-[309/192] object-cover transition group-hover:rotate-6 group-hover:scale-125"
                             />
                           </Link>
                         </div>
