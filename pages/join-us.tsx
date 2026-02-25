@@ -248,17 +248,22 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
         if (value !== null && value !== '') {
           if (key === 'orgIntroductionFile' && value instanceof File) {
             submitData.append(key, value)
-          } else {
+          } else if (key !== 'orgIntroductionFile') {
             submitData.append(key, String(value))
           }
         }
       })
 
-      // TODO: 这里应该发送到后端API
-      console.log('Form submitted:', formData)
-      
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/join-us/submit', {
+        method: 'POST',
+        body: submitData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || (language === 'zh-Hans' ? '提交失败' : 'Submission failed'))
+      }
       
       alert(language === 'zh-Hans' ? '表单提交成功！' : 'Form submitted successfully!')
       

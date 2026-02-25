@@ -8,6 +8,7 @@ module.exports = {
         PORT: 6001,
         NODE_ENV: 'production'
       },
+      // 会员申请表单需从 .env 加载: NEXT_PUBLIC_STRAPI_API_URL, STRAPI_API_TOKEN
       instances: 1,
       autorestart: true,
       watch: false,

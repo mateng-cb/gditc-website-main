@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const formidable = require('formidable');
 const app = express();
 const PORT = process.env.PORT || 6001;
 
@@ -22,6 +24,105 @@ if (!fs.existsSync(indexFile)) {
 
 console.log('✅ 静态文件目录检查通过');
 console.log(`📁 服务目录: ${staticDir}`);
+
+// 会员申请表单字段
+const FORM_FIELDS = [
+  'membershipCategory', 'technicalCommittee', 'orgNameChinese', 'orgNameEnglish',
+  'orgType', 'industrySector', 'country', 'address', 'foundedDate', 'annualSales',
+  'orgIntroduction', 'applicantNameChinese', 'applicantNameEnglish', 'gender',
+  'dateOfBirth', 'nationality', 'jobTitle', 'phone', 'email', 'englishLevel'
+];
+
+// 会员申请表单提交 API（需在 app.get('*') 之前注册，支持带/不带尾部斜杠）
+app.post(/^\/api\/join-us\/submit\/?$/, (req, res) => {
+  const strapiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api').replace(/\/$/, '');
+  const strapiToken = process.env.STRAPI_API_TOKEN;
+
+  if (!strapiToken) {
+    console.error('[join-us/submit] STRAPI_API_TOKEN 未配置');
+    return res.status(500).json({ success: false, message: 'Server configuration error' });
+  }
+
+  const form = formidable({ maxFileSize: 10 * 1024 * 1024, keepExtensions: true });
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('[join-us/submit] 解析表单失败:', err);
+      return res.status(500).json({ success: false, message: 'Failed to parse form' });
+    }
+
+    const parsedFields = {};
+    for (const key of FORM_FIELDS) {
+      const value = fields[key];
+      parsedFields[key] = Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
+    }
+
+    const fileField = files.orgIntroductionFile;
+    const file = Array.isArray(fileField) ? fileField[0] : fileField || null;
+
+    try {
+      const createData = {};
+      for (const key of FORM_FIELDS) {
+        const value = parsedFields[key];
+        if (value !== undefined && value !== '') createData[key] = value;
+      }
+
+      const createResponse = await fetch(`${strapiUrl}/membership-applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${strapiToken}` },
+        body: JSON.stringify({ data: createData }),
+      });
+
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json().catch(() => ({}));
+        console.error('[join-us/submit] Strapi 创建失败:', createResponse.status, errorData);
+        return res.status(createResponse.status).json({
+          success: false,
+          message: errorData.error?.message || 'Failed to submit application',
+        });
+      }
+
+      const createResult = await createResponse.json();
+      const documentId = createResult.data?.documentId;
+
+      if (file && file.filepath && documentId) {
+        try {
+          const fileBuffer = fs.readFileSync(file.filepath);
+          const formData = new FormData();
+          formData.append('files', new Blob([fileBuffer], { type: file.mimetype || 'application/pdf' }), file.originalFilename || 'upload.pdf');
+          formData.append('ref', 'api::membership-application.membership-application');
+          formData.append('refId', documentId);
+          formData.append('field', 'orgIntroductionFile');
+
+          const uploadResponse = await fetch(`${strapiUrl}/upload`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${strapiToken}` },
+            body: formData,
+          });
+
+          fs.unlink(file.filepath, () => {});
+          if (!uploadResponse.ok) {
+            console.warn('[join-us/submit] 文件上传失败，但申请已创建:', await uploadResponse.text());
+          }
+        } catch (uploadErr) {
+          console.warn('[join-us/submit] 文件上传异常:', uploadErr);
+          try { fs.unlinkSync(file.filepath); } catch (_) {}
+        }
+      } else if (file?.filepath) {
+        try { fs.unlinkSync(file.filepath); } catch (_) {}
+      }
+
+      res.status(200).json({ success: true, message: 'Application submitted successfully', documentId });
+    } catch (error) {
+      console.error('[join-us/submit] 提交失败:', error);
+      if (file?.filepath) try { fs.unlinkSync(file.filepath); } catch (_) {}
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Submission failed',
+      });
+    }
+  });
+});
 
 // 设置静态文件服务
 app.use(express.static(staticDir));
