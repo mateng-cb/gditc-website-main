@@ -6,6 +6,7 @@ import SEOHead from '../../../components/SEOHead'
 import PageBanner from '../../../components/PageBanner'
 import { EmptyEvents } from '../../../components/EmptyState'
 import { getEvents, Event as StrapiEvent } from '../../../lib/strapi'
+import { getCoverImageUrl } from '../../../lib/cover-utils'
 import { useLanguage } from '../../_app'
 
 // 本地Event接口，用于组件内部
@@ -20,7 +21,8 @@ interface Event {
   type: string | null;
   cover: {
     url: string;
-    alternativeText: string | null;
+    alternativeText?: string | null;
+    formats?: { small?: { url: string }; medium?: { url: string }; thumbnail?: { url: string } };
   } | null;
 }
 
@@ -251,7 +253,7 @@ export default function EventsPage({
                         <div className="mb-8 overflow-hidden rounded-[5px]">
                           <Link href={`/events/${event.documentId || event.id}`} className="block">
                             <img
-                              src={event.cover?.url || '/images/blog/blog-01.jpg'}
+                              src={getCoverImageUrl(event.cover, 'medium') || '/images/blog/blog-01.jpg'}
                               alt={event.cover?.alternativeText || event.title}
                               className="w-full aspect-[309/192] object-cover transition group-hover:rotate-6 group-hover:scale-125"
                             />
@@ -384,6 +386,7 @@ export const getStaticProps: GetStaticProps<EventsPageProps> = async ({ params }
         location: event.location || null,
         type: event.type || null,
         cover: event.cover ? {
+          ...event.cover,
           url: event.cover.url || '/images/blog/blog-01.jpg',
           alternativeText: event.cover.alternativeText || event.title || 'Event cover'
         } : null

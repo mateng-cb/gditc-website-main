@@ -6,6 +6,7 @@ import SEOHead from '../components/SEOHead';
 import BlockRenderer from '../components/BlockRenderer';
 import { useLanguage } from './_app';
 import { getDetailContent, getContentList, DetailContent, BlockContent } from '../lib/detail-api';
+import { getCoverImageUrl } from '../lib/cover-utils';
 import { parseMarkdown, isMarkdown } from '../lib/markdown-parser';
 
 interface DetailPageProps {
@@ -393,7 +394,7 @@ export default function DetailPage({
                         <div className="mr-5 h-20 w-full max-w-[80px] overflow-hidden rounded-full">
                           {article.cover?.url ? (
                             <img
-                              src={article.cover.url}
+                              src={getCoverImageUrl(article.cover, 'thumbnail')}
                               alt={article.title}
                               className="w-full h-full object-cover"
                             />
@@ -472,7 +473,7 @@ export default function DetailPage({
                     <a href={`/${channelType}/${article.documentId}`} className="block">
                       {article.cover?.url ? (
                         <img
-                          src={article.cover.url}
+                          src={getCoverImageUrl(article.cover, 'medium')}
                           alt={article.title}
                           className="w-full h-48 object-cover transition group-hover:rotate-6 group-hover:scale-125"
                         />

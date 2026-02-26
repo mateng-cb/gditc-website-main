@@ -6,6 +6,7 @@ import SEOHead from '../../../components/SEOHead'
 import PageBanner from '../../../components/PageBanner'
 import { EmptyCertifications } from '../../../components/EmptyState'
 import { getCertifications, Article } from '../../../lib/strapi'
+import { getCoverImageUrl } from '../../../lib/cover-utils'
 import { useLanguage } from '../../_app'
 
 interface NewsroomPageProps {
@@ -334,7 +335,7 @@ export default function NewsroomPage({
                           <Link href={`/certifications/${article.documentId}`} className="block">
                             {article.cover && article.cover.url && (
                               <img
-                                src={article.cover.url}
+                                src={getCoverImageUrl(article.cover, 'medium')}
                                 alt={article.cover.alternativeText || article.title}
                                 className="w-full h-48 object-cover transition group-hover:rotate-6 group-hover:scale-125"
                               />

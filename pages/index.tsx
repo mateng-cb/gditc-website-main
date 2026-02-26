@@ -6,6 +6,7 @@ import SEOHead from '../components/SEOHead';
 import OptimizedImage from '../components/OptimizedImage';
 import AnimatedNumber from '../components/AnimatedNumber';
 import { getTraining, getHome, getEvents } from '../lib/strapi';
+import { getCoverImageUrl } from '../lib/cover-utils';
 import { t } from '../lib/translations';
 import { useLanguage } from './_app';
 
@@ -413,7 +414,7 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
                   <Link href={`/events/${event.documentId || event.id}`} className="block">
                     <div className="overflow-hidden h-48">
                       <img
-                        src={event.cover?.url || '/images/blog/blog-01.jpg'}
+                        src={getCoverImageUrl(event.cover, 'medium') || '/images/blog/blog-01.jpg'}
                         alt={event.cover?.alternativeText || event.title}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
@@ -770,6 +771,7 @@ export const getStaticProps: GetStaticProps = async () => {
         title: event.title || 'Untitled Event',
         date: event.date || new Date().toISOString(),
         cover: event.cover ? {
+          ...event.cover,
           url: event.cover.url || '/images/blog/blog-01.jpg',
           alternativeText: event.cover.alternativeText || event.title
         } : null

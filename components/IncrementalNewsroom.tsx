@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useIncrementalArticles } from '../hooks/useIncrementalData';
 import { Article } from '../lib/strapi';
+import { getCoverImageUrl } from '../lib/cover-utils';
 
 interface IncrementalNewsroomProps {
   initialArticles: Article[];
@@ -64,7 +65,7 @@ export default function IncrementalNewsroom({
             {article.cover && (
               <div className="aspect-w-16 aspect-h-9">
                 <img
-                  src={article.cover.url}
+                  src={getCoverImageUrl(article.cover, 'medium')}
                   alt={article.cover.alternativeText || article.title}
                   className="w-full h-48 object-cover"
                 />

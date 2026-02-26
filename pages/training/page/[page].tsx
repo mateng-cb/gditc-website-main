@@ -6,6 +6,7 @@ import SEOHead from '../../../components/SEOHead'
 import PageBanner from '../../../components/PageBanner'
 import { EmptyTraining } from '../../../components/EmptyState'
 import { getTraining, Sector } from '../../../lib/strapi'
+import { getCoverImageUrl } from '../../../lib/cover-utils'
 import { useLanguage } from '../../_app'
 
 interface SectorsPageProps {
@@ -209,7 +210,7 @@ export default function SectorsPage({
                         <div className="mb-8 overflow-hidden rounded-[5px]">
                           <Link href={`/training/${sector.documentId || sector.id}`} className="block">
                             <img
-                              src={sector.cover?.url || '/images/blog/blog-01.jpg'}
+                              src={getCoverImageUrl(sector.cover, 'medium') || '/images/blog/blog-01.jpg'}
                               alt={sector.title}
                               className="w-full h-48 object-cover transition group-hover:rotate-6 group-hover:scale-125"
                             />

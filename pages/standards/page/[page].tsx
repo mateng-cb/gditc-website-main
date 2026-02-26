@@ -6,6 +6,7 @@ import SEOHead from '../../../components/SEOHead'
 import PageBanner from '../../../components/PageBanner'
 import { EmptyStandards } from '../../../components/EmptyState'
 import { getStandards } from '../../../lib/strapi'
+import { getCoverImageUrl } from '../../../lib/cover-utils'
 import { useLanguage } from '../../_app'
 
 interface Resource {
@@ -314,13 +315,13 @@ export const getStaticProps: GetStaticProps<ResourcesPageProps> = async ({ param
     
     // 转换数据格式以匹配Resource接口
     const allResources: Resource[] = standards.map((standard: any) => {
-      // 安全处理cover字段
+      // 安全处理cover字段，优先使用 formats 中的合适尺寸避免大图缩小后模糊
       let coverUrl = '/images/blog/blog-01.jpg';
       if (standard.cover) {
         if (typeof standard.cover === 'string') {
           coverUrl = standard.cover;
         } else if (standard.cover.url) {
-          coverUrl = standard.cover.url;
+          coverUrl = getCoverImageUrl(standard.cover, 'medium') || standard.cover.url;
         }
       }
 
