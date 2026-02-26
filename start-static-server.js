@@ -1,8 +1,10 @@
-require('dotenv').config();
-const express = require('express');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '.env.local') }); // .env.local 覆盖 .env
+const express = require('express');
 const fs = require('fs');
-const formidable = require('formidable');
+const formidable = require('formidable').default || require('formidable').formidable || require('formidable');
+const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 6001;
 
@@ -33,6 +35,99 @@ const FORM_FIELDS = [
   'dateOfBirth', 'nationality', 'jobTitle', 'phone', 'email', 'englishLevel'
 ];
 
+// 证书查询 API（需在 app.get('*') 之前注册）
+app.get(/^\/api\/certificate-query\/?$/, async (req, res) => {
+  const strapiBaseUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337/api').replace(/\/api\/?$/, '');
+  const strapiApiUrl = `${strapiBaseUrl}/api`;
+  const { idNumber, certificateNumber } = req.query;
+
+  if (!idNumber || !certificateNumber) {
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(400).json({ success: false, message: '请同时提供身份证号和证书编号' });
+  }
+
+  try {
+    const params = new URLSearchParams({
+      idNumber: String(idNumber).trim(),
+      certificateNumber: String(certificateNumber).trim(),
+    });
+    const response = await axios.get(`${strapiApiUrl}/certificate-query?${params}`, {
+      headers: { 'Content-Type': 'application/json' },
+      validateStatus: () => true,
+    });
+    const result = response.data;
+
+    if (response.status >= 400) {
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(response.status).json({
+        success: false,
+        message: result.error?.message || result.message || '查询失败',
+      });
+    }
+
+    const data = result.data || [];
+    const formattedData = data.map((item) => {
+      let certificateUrl = item.certificateUrl;
+      if (certificateUrl && !certificateUrl.startsWith('http')) {
+        certificateUrl = `${strapiBaseUrl}${certificateUrl}`;
+      }
+      return {
+        year: item.year,
+        certificateNumber: item.certificateNumber,
+        qualification: item.qualification,
+        name: item.name,
+        idNumber: item.idNumber,
+        trainingStartDate: item.trainingStartDate,
+        trainingEndDate: item.trainingEndDate,
+        assessmentMethod: item.assessmentMethod || '-',
+        issueDate: item.issueDate,
+        certificateUrl: certificateUrl || undefined,
+      };
+    });
+
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({ success: true, data: formattedData });
+  } catch (error) {
+    console.error('[certificate-query] 查询失败:', error);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(500).json({
+      success: false,
+      message: error?.message || '查询失败',
+    });
+  }
+});
+
+// 证书下载代理 API（绕过跨域，触发浏览器直接下载）
+app.get(/^\/api\/certificate-download\/?$/, async (req, res) => {
+  const { url, filename } = req.query;
+  if (!url) {
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(400).json({ message: 'Missing url parameter' });
+  }
+  try {
+    const response = await axios.get(String(url), {
+      responseType: 'arraybuffer',
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      validateStatus: () => true,
+    });
+    if (response.status >= 400) {
+      return res.status(response.status).end();
+    }
+    const contentType = response.headers['content-type'] || 'application/octet-stream';
+    const urlName = String(url).split('/').pop() || '';
+    const ext = urlName.includes('.') ? urlName.slice(urlName.lastIndexOf('.')) : '.pdf';
+    const downloadName = (typeof filename === 'string' ? (filename.includes('.') ? filename : filename + ext) : urlName) || 'certificate.pdf';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(downloadName)}"`);
+    res.setHeader('Content-Length', response.data.length);
+    res.send(response.data);
+  } catch (error) {
+    console.error('[certificate-download]', error);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(500).json({ message: 'Download failed' });
+  }
+});
+
 // 会员申请表单提交 API（需在 app.get('*') 之前注册，支持带/不带尾部斜杠）
 app.post(/^\/api\/join-us\/submit\/?$/, (req, res) => {
   const strapiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api').replace(/\/$/, '');
@@ -43,79 +138,89 @@ app.post(/^\/api\/join-us\/submit\/?$/, (req, res) => {
     return res.status(500).json({ success: false, message: 'Server configuration error' });
   }
 
-  const form = formidable({ maxFileSize: 10 * 1024 * 1024, keepExtensions: true });
+  const form = formidable({ maxFileSize: 10 * 1024 * 1024, keepExtensions: true }); // 10MB
 
   form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error('[join-us/submit] 解析表单失败:', err);
-      return res.status(500).json({ success: false, message: 'Failed to parse form' });
-    }
-
-    const parsedFields = {};
-    for (const key of FORM_FIELDS) {
-      const value = fields[key];
-      parsedFields[key] = Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
-    }
-
-    const fileField = files.orgIntroductionFile;
-    const file = Array.isArray(fileField) ? fileField[0] : fileField || null;
-
+    let file = null;
     try {
+      if (err) {
+        console.error('[join-us/submit] 解析表单失败:', err);
+        return res.status(500).json({ success: false, message: 'Failed to parse form' });
+      }
+
+      const parsedFields = {};
+      for (const key of FORM_FIELDS) {
+        const value = fields[key];
+        parsedFields[key] = Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
+      }
+
+      const fileField = files.orgIntroductionFile;
+      file = Array.isArray(fileField) ? fileField[0] : fileField || null;
+
       const createData = {};
       for (const key of FORM_FIELDS) {
         const value = parsedFields[key];
         if (value !== undefined && value !== '') createData[key] = value;
       }
 
-      const createResponse = await fetch(`${strapiUrl}/membership-applications`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${strapiToken}` },
-        body: JSON.stringify({ data: createData }),
-      });
+      const createResponse = await axios.post(
+        `${strapiUrl}/membership-applications`,
+        { data: createData },
+        {
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${strapiToken}` },
+          validateStatus: () => true,
+        }
+      );
 
-      if (!createResponse.ok) {
-        const errorData = await createResponse.json().catch(() => ({}));
+      if (createResponse.status < 200 || createResponse.status >= 300) {
+        const errorData = createResponse.data || {};
         console.error('[join-us/submit] Strapi 创建失败:', createResponse.status, errorData);
-        return res.status(createResponse.status).json({
+        return res.status(500).json({
           success: false,
           message: errorData.error?.message || 'Failed to submit application',
         });
       }
 
-      const createResult = await createResponse.json();
-      const documentId = createResult.data?.documentId;
+      const createdData = createResponse.data?.data;
+      const refId = createdData?.id ?? createdData?.documentId;
 
-      if (file && file.filepath && documentId) {
+      if (file && file.filepath && refId) {
         try {
-          const fileBuffer = fs.readFileSync(file.filepath);
-          const formData = new FormData();
-          formData.append('files', new Blob([fileBuffer], { type: file.mimetype || 'application/pdf' }), file.originalFilename || 'upload.pdf');
-          formData.append('ref', 'api::membership-application.membership-application');
-          formData.append('refId', documentId);
-          formData.append('field', 'orgIntroductionFile');
-
-          const uploadResponse = await fetch(`${strapiUrl}/upload`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${strapiToken}` },
-            body: formData,
+          const FormData = require('form-data');
+          const uploadForm = new FormData();
+          uploadForm.append('files', fs.createReadStream(file.filepath), {
+            filename: file.originalFilename || 'upload.pdf',
+            contentType: file.mimetype || 'application/pdf',
           });
+          uploadForm.append('ref', 'api::membership-application.membership-application');
+          uploadForm.append('refId', String(refId));
+          uploadForm.append('field', 'orgIntroductionFile');
 
-          fs.unlink(file.filepath, () => {});
-          if (!uploadResponse.ok) {
-            console.warn('[join-us/submit] 文件上传失败，但申请已创建:', await uploadResponse.text());
+          const uploadRes = await axios.post(`${strapiUrl}/upload`, uploadForm, {
+            headers: { ...uploadForm.getHeaders(), Authorization: `Bearer ${strapiToken}` },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+            validateStatus: () => true,
+          });
+          if (uploadRes.status >= 400) {
+            console.warn('[join-us/submit] 文件上传返回错误:', uploadRes.status, uploadRes.data);
           }
         } catch (uploadErr) {
-          console.warn('[join-us/submit] 文件上传异常:', uploadErr);
+          const errDetail = uploadErr.response?.data || uploadErr.message;
+          console.warn('[join-us/submit] 文件上传失败，但申请已创建. refId=', refId, 'error=', errDetail);
+        } finally {
           try { fs.unlinkSync(file.filepath); } catch (_) {}
         }
       } else if (file?.filepath) {
         try { fs.unlinkSync(file.filepath); } catch (_) {}
       }
 
-      res.status(200).json({ success: true, message: 'Application submitted successfully', documentId });
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json({ success: true, message: 'Application submitted successfully', documentId: createdData?.documentId });
     } catch (error) {
       console.error('[join-us/submit] 提交失败:', error);
       if (file?.filepath) try { fs.unlinkSync(file.filepath); } catch (_) {}
+      res.setHeader('Content-Type', 'application/json');
       res.status(500).json({
         success: false,
         message: error instanceof Error ? error.message : 'Submission failed',

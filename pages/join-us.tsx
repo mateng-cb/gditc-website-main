@@ -65,6 +65,16 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
   // 表单验证错误
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // Toast 通知：{ type: 'success'|'error', message: string }
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  // 文件输入重置 key，提交成功后递增以清空文件选择
+  const [fileInputKey, setFileInputKey] = useState(0)
+
+  // 表单限制常量
+  const INPUT_MAX_LENGTH = 200
+  const TEXTAREA_MAX_LENGTH = 500
+  const FILE_MAX_SIZE = 10 * 1024 * 1024 // 10MB
+  const FILE_ACCEPT = '.jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt'
 
   const getApplicationSteps = () => {
     const currentTranslations = translations[language] || translations['en'] || getTranslation(language)
@@ -126,19 +136,43 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
   const applicationSteps = getApplicationSteps()
   const membershipTypes = getMembershipTypes()
 
-  // 处理输入变化
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 4000)
+  }
+
+  // 处理输入变化（带长度限制）
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    // 清除该字段的错误
+    const target = e.target
+    const maxLen = target instanceof HTMLTextAreaElement ? TEXTAREA_MAX_LENGTH : INPUT_MAX_LENGTH
+    const trimmed = value.length > maxLen ? value.slice(0, maxLen) : value
+    setFormData(prev => ({ ...prev, [name]: trimmed }))
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
   }
 
-  // 处理文件上传
+  // 处理文件上传（带格式和大小校验）
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
+    const isZh = language === 'zh-Hans'
+    if (file) {
+      if (file.size > FILE_MAX_SIZE) {
+        setErrors(prev => ({ ...prev, orgIntroductionFile: isZh ? '文件大小不能超过 10MB' : 'File size must not exceed 10MB' }))
+        setFormData(prev => ({ ...prev, orgIntroductionFile: null }))
+        e.target.value = ''
+        return
+      }
+      const allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'txt']
+      const ext = file.name.split('.').pop()?.toLowerCase() || ''
+      if (!allowedExts.includes(ext)) {
+        setErrors(prev => ({ ...prev, orgIntroductionFile: isZh ? '仅支持 JPG、PNG、GIF、WebP、PDF、DOC、DOCX、TXT 格式' : 'Only JPG, PNG, GIF, WebP, PDF, DOC, DOCX, TXT formats are supported' }))
+        setFormData(prev => ({ ...prev, orgIntroductionFile: null }))
+        e.target.value = ''
+        return
+      }
+    }
     setFormData(prev => ({ ...prev, orgIntroductionFile: file }))
     if (errors.orgIntroductionFile) {
       setErrors(prev => ({ ...prev, orgIntroductionFile: '' }))
@@ -208,6 +242,11 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
     }
     if (!formData.phone) {
       newErrors.phone = isZh ? '请输入电话' : 'Please enter phone number'
+    } else {
+      const digitsOnly = formData.phone.replace(/\D/g, '')
+      if (digitsOnly.length < 7 || digitsOnly.length > 20) {
+        newErrors.phone = isZh ? '请输入有效的电话号码（7-20位数字）' : 'Please enter a valid phone number (7-20 digits)'
+      }
     }
     if (!formData.email) {
       newErrors.email = isZh ? '请输入邮箱' : 'Please enter email'
@@ -265,7 +304,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
         throw new Error(result.message || (language === 'zh-Hans' ? '提交失败' : 'Submission failed'))
       }
       
-      alert(language === 'zh-Hans' ? '表单提交成功！' : 'Form submitted successfully!')
+      showToast('success', language === 'zh-Hans' ? '表单提交成功！' : 'Form submitted successfully!')
       
       // 重置表单
       setFormData({
@@ -292,9 +331,10 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
         englishLevel: ''
       })
       setErrors({})
+      setFileInputKey(k => k + 1)
     } catch (error) {
       console.error('Form submission error:', error)
-      alert(language === 'zh-Hans' ? '提交失败，请稍后重试' : 'Submission failed, please try again')
+      showToast('error', error instanceof Error ? error.message : (language === 'zh-Hans' ? '提交失败，请稍后重试' : 'Submission failed, please try again'))
     } finally {
       setIsSubmitting(false)
     }
@@ -302,6 +342,28 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
 
   return (
     <>
+      {/* Toast 通知 */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-[9999] px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${
+            toast.type === 'success'
+              ? 'bg-green-600 text-white'
+              : 'bg-red-600 text-white'
+          }`}
+          role="alert"
+        >
+          {toast.type === 'success' ? (
+            <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          )}
+          <span className="font-medium">{toast.message}</span>
+        </div>
+      )}
       <SEOHead
         title={t(language, 'joinUs.pageTitle')}
         description={t(language, 'joinUs.pageDescription')}
@@ -605,6 +667,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                           name="orgNameChinese"
                           value={formData.orgNameChinese}
                           onChange={handleChange}
+                          maxLength={INPUT_MAX_LENGTH}
                           className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                             errors.orgNameChinese ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                           }`}
@@ -622,6 +685,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                           name="orgNameEnglish"
                           value={formData.orgNameEnglish}
                           onChange={handleChange}
+                          maxLength={INPUT_MAX_LENGTH}
                           className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                             errors.orgNameEnglish ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                           }`}
@@ -643,6 +707,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="orgType"
                       value={formData.orgType}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       placeholder={language === 'zh-Hans' ? '政府机构、企业、研究机构、高等院校等' : 'Government departments, Enterprises, Research institutions, Higher education institutions, etc'}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.orgType ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
@@ -663,6 +728,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="industrySector"
                       value={formData.industrySector}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.industrySector ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -682,6 +748,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="country"
                       value={formData.country}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.country ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -701,6 +768,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.address ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -720,6 +788,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="foundedDate"
                       value={formData.foundedDate}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       placeholder={language === 'zh-Hans' ? '请输入成立时间' : 'Please enter founded date'}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.foundedDate ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
@@ -740,6 +809,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="annualSales"
                       value={formData.annualSales}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.annualSales ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -759,24 +829,47 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       value={formData.orgIntroduction}
                       onChange={handleChange}
                       rows={4}
+                      maxLength={TEXTAREA_MAX_LENGTH}
+                      placeholder={language === 'zh-Hans' ? `最多${TEXTAREA_MAX_LENGTH}字` : `Max ${TEXTAREA_MAX_LENGTH} characters`}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.orgIntroduction ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
                     />
                     <div className="mt-2">
-                      <label className="block text-xs text-body-color dark:text-dark-6 mb-1">
+                      <label className="block text-xs text-body-color dark:text-dark-6 mb-2">
                         {language === 'zh-Hans' ? '或上传材料' : 'Or upload material'}
                       </label>
-                      <input
-                        type="file"
-                        name="orgIntroductionFile"
-                        onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx,.txt"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-3 rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white"
-                      />
+                      <div className="flex flex-wrap items-center gap-3">
+                        <label className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-dark-3 rounded-lg bg-gray-50 dark:bg-dark-2 text-dark dark:text-white cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-3 transition-colors">
+                          <svg className="w-5 h-5 text-body-color dark:text-dark-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          <span className="text-sm font-medium">
+                            {language === 'zh-Hans' ? '选择文件' : 'Choose file'}
+                          </span>
+                          <input
+                            key={fileInputKey}
+                            type="file"
+                            name="orgIntroductionFile"
+                            onChange={handleFileChange}
+                            accept={FILE_ACCEPT}
+                            className="sr-only"
+                          />
+                        </label>
+                        {formData.orgIntroductionFile && (
+                          <span className="text-sm text-body-color dark:text-dark-6 truncate max-w-[200px]" title={formData.orgIntroductionFile.name}>
+                            {formData.orgIntroductionFile.name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 text-xs text-body-color dark:text-dark-6">
+                        {language === 'zh-Hans'
+                          ? '支持格式：JPG、PNG、GIF、WebP、PDF、DOC、DOCX、TXT；大小不超过 10MB'
+                          : 'Supported formats: JPG, PNG, GIF, WebP, PDF, DOC, DOCX, TXT; Max 10MB'}
+                      </p>
                     </div>
-                    {errors.orgIntroduction && (
-                      <p className="mt-1 text-sm text-red-500">{errors.orgIntroduction}</p>
+                    {(errors.orgIntroduction || errors.orgIntroductionFile) && (
+                      <p className="mt-1 text-sm text-red-500">{errors.orgIntroduction || errors.orgIntroductionFile}</p>
                     )}
                   </div>
                 </div>
@@ -804,6 +897,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                           name="applicantNameChinese"
                           value={formData.applicantNameChinese}
                           onChange={handleChange}
+                          maxLength={INPUT_MAX_LENGTH}
                           className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                             errors.applicantNameChinese ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                           }`}
@@ -821,6 +915,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                           name="applicantNameEnglish"
                           value={formData.applicantNameEnglish}
                           onChange={handleChange}
+                          maxLength={INPUT_MAX_LENGTH}
                           className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                             errors.applicantNameEnglish ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                           }`}
@@ -876,6 +971,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       placeholder={language === 'zh-Hans' ? '请输入出生年月' : 'Please enter date of birth'}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.dateOfBirth ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
@@ -896,6 +992,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="nationality"
                       value={formData.nationality}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.nationality ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -915,6 +1012,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="jobTitle"
                       value={formData.jobTitle}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.jobTitle ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -934,6 +1032,8 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
+                      placeholder={language === 'zh-Hans' ? '支持国际格式，如 +86 138 1234 5678' : 'International format supported, e.g. +1 234 567 8900'}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}
@@ -953,6 +1053,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
+                      maxLength={INPUT_MAX_LENGTH}
                       className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white ${
                         errors.email ? 'border-red-500' : 'border-gray-300 dark:border-dark-3'
                       }`}

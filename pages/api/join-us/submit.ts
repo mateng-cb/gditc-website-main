@@ -107,16 +107,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const createResult = await createResponse.json();
-    const documentId = createResult.data?.documentId;
+    const createdData = createResult.data;
+    const refId = createdData?.id ?? createdData?.documentId;
 
-    // 2. 如果有文件，上传并关联到记录
-    if (file && file.filepath && documentId) {
+    // 2. 如果有文件，上传并关联到记录（refId 需用数据库行 id，Strapi 5 部分版本用 documentId）
+    if (file && file.filepath && refId) {
       try {
         const fileBuffer = fs.readFileSync(file.filepath);
         const formData = new FormData();
         formData.append('files', new Blob([fileBuffer], { type: file.mimetype || 'application/pdf' }), file.originalFilename || 'upload.pdf');
         formData.append('ref', 'api::membership-application.membership-application');
-        formData.append('refId', documentId);
+        formData.append('refId', String(refId));
         formData.append('field', 'orgIntroductionFile');
 
         const uploadResponse = await fetch(`${strapiUrl}/upload`, {
@@ -149,7 +150,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       success: true,
       message: 'Application submitted successfully',
-      documentId,
+      documentId: createdData?.documentId,
     });
   } catch (error) {
     console.error('[join-us/submit] 提交失败:', error);

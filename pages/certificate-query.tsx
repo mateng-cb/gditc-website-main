@@ -20,47 +20,54 @@ interface CertificateResult {
 
 export default function CertificateQuery() {
   const { language } = useLanguage()
+  const [idNumber, setIdNumber] = useState('')
   const [certificateNumber, setCertificateNumber] = useState('')
   const [results, setResults] = useState<CertificateResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
 
   const handleSearch = async () => {
-    if (!certificateNumber.trim()) {
+    if (!idNumber.trim() || !certificateNumber.trim()) {
       return
     }
 
     setIsSearching(true)
     setHasSearched(true)
 
-    // TODO: 这里应该调用实际的API进行查询
-    // 目前使用模拟数据
-    await new Promise(resolve => setTimeout(resolve, 500))
+    try {
+      const params = new URLSearchParams({
+        idNumber: idNumber.trim(),
+        certificateNumber: certificateNumber.trim(),
+      })
+      const res = await fetch(`/api/certificate-query?${params}`)
+      const json = await res.json()
 
-    // 模拟查询结果 - 使用图片中的数据
-    const mockResults: CertificateResult[] = certificateNumber.trim() 
-      ? [{
-          year: '2025',
-          certificateNumber: 'ZLPX20251134',
-          qualification: '数据中心基础设施运行与维护专家',
-          name: '孙金宇',
-          idNumber: '230302199411235617',
-          trainingStartDate: '2025-07-23 00:00',
-          trainingEndDate: '2025-07-25 00:00',
-          assessmentMethod: '-',
-          issueDate: '2025-07-30 00:00',
-          certificateUrl: '#'
-        }]
-      : []
-
-    setResults(mockResults)
-    setIsSearching(false)
+      if (json.success && Array.isArray(json.data)) {
+        setResults(json.data)
+      } else {
+        setResults([])
+      }
+    } catch {
+      setResults([])
+    } finally {
+      setIsSearching(false)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch()
     }
+  }
+
+  const handleDownload = (url: string, fileName?: string) => {
+    const downloadUrl = `/api/certificate-download?url=${encodeURIComponent(url)}${fileName ? `&filename=${encodeURIComponent(fileName)}` : ''}`
+    const a = document.createElement('a')
+    a.href = downloadUrl
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
   }
 
   const isZh = language === 'zh-Hans'
@@ -75,7 +82,7 @@ export default function CertificateQuery() {
         {/* Banner Section */}
         <PageBanner
           title={isZh ? '证书查询' : 'Certificate Query'}
-          description={isZh ? '输入证书编号查询证书信息' : 'Enter certificate number to query certificate information'}
+          description={isZh ? '输入身份证号和证书编号查询证书信息' : 'Enter ID number and certificate number to query certificate information'}
           showDivider
         />
 
@@ -84,24 +91,39 @@ export default function CertificateQuery() {
           <div className="container mx-auto px-4 max-w-4xl">
             {/* Search Form */}
             <div className="bg-white dark:bg-dark rounded-lg shadow-lg p-8 mb-8">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-dark dark:text-white mb-2">
-                    {isZh ? '证书编号' : 'Certificate Number'}
-                  </label>
-                  <input
-                    type="text"
-                    value={certificateNumber}
-                    onChange={(e) => setCertificateNumber(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder={isZh ? '请输入证书编号' : 'Please enter certificate number'}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-dark-3 rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-dark dark:text-white mb-2">
+                      {isZh ? '身份证号' : 'ID Number'}
+                    </label>
+                    <input
+                      type="text"
+                      value={idNumber}
+                      onChange={(e) => setIdNumber(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder={isZh ? '请输入身份证号' : 'Please enter ID number'}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-dark-3 rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-dark dark:text-white mb-2">
+                      {isZh ? '证书编号' : 'Certificate Number'}
+                    </label>
+                    <input
+                      type="text"
+                      value={certificateNumber}
+                      onChange={(e) => setCertificateNumber(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder={isZh ? '请输入证书编号' : 'Please enter certificate number'}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-dark-3 rounded-lg bg-white dark:bg-dark-2 text-dark dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
                 </div>
                 <div className="flex items-end">
                   <button
                     onClick={handleSearch}
-                    disabled={isSearching || !certificateNumber.trim()}
+                    disabled={isSearching || !idNumber.trim() || !certificateNumber.trim()}
                     className="w-full md:w-auto px-8 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSearching 
@@ -187,22 +209,29 @@ export default function CertificateQuery() {
                             
                             {/* 第三列 - 查看证书和下载，纵向居中，左对齐（移动端去掉左右内边距） */}
                             <div className="flex flex-col items-start justify-center px-0 md:px-4 space-y-3">
-                              <a
-                                href={result.certificateUrl || '#'}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:text-primary/80 font-medium transition-colors whitespace-nowrap"
-                              >
-                                {isZh ? '查看证书' : 'View Certificate'}
-                              </a>
-                              <a
-                                href={result.certificateUrl || '#'}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:text-primary/80 font-medium transition-colors whitespace-nowrap"
-                              >
-                                {isZh ? '证书下载' : 'Download Certificate'}
-                              </a>
+                              {result.certificateUrl ? (
+                                <>
+                                  <a
+                                    href={result.certificateUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:text-primary/80 font-medium transition-colors whitespace-nowrap"
+                                  >
+                                    {isZh ? '查看证书' : 'View Certificate'}
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDownload(result.certificateUrl!, `${result.name}_${result.certificateNumber}`)}
+                                    className="text-primary hover:text-primary/80 font-medium transition-colors whitespace-nowrap text-left bg-transparent border-0 p-0 cursor-pointer"
+                                  >
+                                    {isZh ? '证书下载' : 'Download Certificate'}
+                                  </button>
+                                </>
+                              ) : (
+                                <span className="text-body-color dark:text-dark-6 text-sm">
+                                  {isZh ? '暂无证书文件' : 'No certificate file'}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
