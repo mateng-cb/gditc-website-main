@@ -60,7 +60,7 @@ const Pagination = ({
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex justify-center items-center mt-12 space-x-2">
+    <div className="flex justify-center items-center mt-14 space-x-2">
       {/* 上一页按钮 */}
       {currentPage > 1 ? (
         <Link 
@@ -233,8 +233,8 @@ export default function NewsroomPage({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 gap-y-40 md:gap-y-40 lg:gap-y-6 mt-48">
               {/* Certification Card 1 */}
               <div 
-                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
-                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+                className="dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{backgroundColor: '#dae3f3', boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
               >
                 <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
                   <img
@@ -243,7 +243,7 @@ export default function NewsroomPage({
                     className="w-full h-auto object-contain mx-auto"
                   />
                 </div>
-                <div className="mt-24">
+                <div className="mt-14">
                   <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                     设计认证
                   </h3>
@@ -255,8 +255,8 @@ export default function NewsroomPage({
 
               {/* Certification Card 2 */}
               <div 
-                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
-                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+                className="dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{backgroundColor: '#dae3f3', boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
               >
                 <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
                   <img
@@ -265,7 +265,7 @@ export default function NewsroomPage({
                     className="w-full h-auto object-contain mx-auto"
                   />
                 </div>
-                <div className="mt-24">
+                <div className="mt-14">
                   <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                     建设认证
                   </h3>
@@ -277,8 +277,8 @@ export default function NewsroomPage({
 
               {/* Certification Card 3 */}
               <div 
-                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
-                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+                className="dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{backgroundColor: '#dae3f3', boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
               >
                 <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
                   <img
@@ -287,7 +287,7 @@ export default function NewsroomPage({
                     className="w-full h-auto object-contain mx-auto"
                   />
                 </div>
-                <div className="mt-24">
+                <div className="mt-14">
                   <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                     运维认证
                   </h3>
@@ -299,8 +299,8 @@ export default function NewsroomPage({
 
               {/* Certification Card 4 */}
               <div 
-                className="bg-white dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
-                style={{boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
+                className="dark:bg-dark-2 rounded-lg p-6 relative overflow-visible"
+                style={{backgroundColor: '#dae3f3', boxShadow: '0 -4px 8px -2px rgba(217, 226, 239, 0.6), 0 4px 8px -2px rgba(217, 226, 239, 0.6), 0 0 4px rgba(217, 226, 239, 0.4)'}}
               >
                 <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-10" style={{width: '198px'}}>
                   <img
@@ -309,7 +309,7 @@ export default function NewsroomPage({
                     className="w-full h-auto object-contain mx-auto"
                   />
                 </div>
-                <div className="mt-24">
+                <div className="mt-14">
                   <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                   基础设施全流程认证
                   </h3>

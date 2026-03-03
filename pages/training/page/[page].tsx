@@ -218,7 +218,7 @@ export default function SectorsPage({
                         </div>
                         <div>
                           <span className="inline-block px-4 py-0.5 mb-6 text-xs font-medium leading-loose text-center text-white rounded-[5px] bg-primary">
-                            {formatDate(sector.publishedAt || sector.date)}
+                            {formatDate(sector.date)}
                           </span>
                           <h3>
                             <Link
