@@ -429,8 +429,8 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
               ))}
             </div>
 
-            {/* CTA Buttons */}
-            <div className="text-center mt-12 space-y-4">
+            {/* CTA Buttons - 使用 max-w-4xl px-4 与方式二对齐（方式二容器有 px-4） */}
+            <div className="mt-12 max-w-4xl mx-auto px-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center" style={{display: 'none'}}>
                 <button className="inline-flex items-center px-8 py-4 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -485,7 +485,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
           </div>
         </section>
 
-        {/* Application Form */}
+        {/* Application Form - 与方式一使用相同 max-w-4xl 对齐 */}
         <section className="pb-20 lg:pb-[120px] bg-gray-1 dark:bg-dark-2">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="mb-8">

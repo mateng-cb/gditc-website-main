@@ -244,7 +244,7 @@ export default function NewsroomPage({
                   />
                 </div>
                 <div className="mt-24">
-                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                     设计认证
                   </h3>
                   <p className="text-sm text-body-color dark:text-dark-6 text-center">
@@ -266,7 +266,7 @@ export default function NewsroomPage({
                   />
                 </div>
                 <div className="mt-24">
-                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                     建设认证
                   </h3>
                   <p className="text-sm text-body-color dark:text-dark-6 text-center">
@@ -288,7 +288,7 @@ export default function NewsroomPage({
                   />
                 </div>
                 <div className="mt-24">
-                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                     运维认证
                   </h3>
                   <p className="text-sm text-body-color dark:text-dark-6 text-center">
@@ -310,7 +310,7 @@ export default function NewsroomPage({
                   />
                 </div>
                 <div className="mt-24">
-                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center">
+                  <h3 className="text-base font-semibold text-dark dark:text-white mb-2 text-center" style={{display: 'none'}}>
                   基础设施全流程认证
                   </h3>
                   <p className="text-sm text-body-color dark:text-dark-6 text-center">

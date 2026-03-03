@@ -1,4 +1,5 @@
 const path = require('path');
+const { exec } = require('child_process');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config({ path: path.join(__dirname, '.env.local') }); // .env.local 覆盖 .env
 const express = require('express');
@@ -126,6 +127,42 @@ app.get(/^\/api\/certificate-download\/?$/, async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ message: 'Download failed' });
   }
+});
+
+// Strapi Webhook 触发重建 API（内容发布/修改后实时更新前端）
+// 需在 app.get('*') 之前注册
+app.post(/^\/api\/rebuild-trigger\/?$/, (req, res) => {
+  const authHeader = req.headers.authorization;
+  const expectedToken = process.env.INCREMENTAL_UPDATE_TOKEN || process.env.REBUILD_TRIGGER_TOKEN;
+
+  if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  // 立即返回 202，不阻塞 Strapi
+  res.setHeader('Content-Type', 'application/json');
+  res.status(202).json({ success: true, message: 'Rebuild triggered' });
+
+  // 异步执行重建（后台运行，不阻塞）
+  const projectDir = path.join(__dirname);
+  console.log(`[rebuild-trigger] 收到 Webhook，开始后台重建... ${new Date().toISOString()}`);
+
+  exec('npm run build', { cwd: projectDir }, (err, stdout, stderr) => {
+    if (err) {
+      console.error('[rebuild-trigger] 构建失败:', err.message);
+      if (stderr) console.error('[rebuild-trigger] stderr:', stderr);
+      return;
+    }
+    console.log('[rebuild-trigger] 构建完成，重启服务器...');
+    exec('pm2 restart gditc-nextjs', { cwd: projectDir }, (restartErr) => {
+      if (restartErr) {
+        console.error('[rebuild-trigger] PM2 重启失败:', restartErr.message);
+        return;
+      }
+      console.log('[rebuild-trigger] 重建完成', new Date().toISOString());
+    });
+  });
 });
 
 // 会员申请表单提交 API（需在 app.get('*') 之前注册，支持带/不带尾部斜杠）

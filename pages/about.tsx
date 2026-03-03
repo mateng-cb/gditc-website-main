@@ -192,7 +192,7 @@ export default function About({ aboutData }: { aboutData: AboutData }) {
                     </h3>
                   </div>
                   <p className="text-base leading-relaxed text-body-color dark:text-dark-6 text-center">
-                    {t(language, "about.missionVision.visionDescription")}
+                    {t(language, "about.coreMandates.visionText")}
                   </p>
                 </div>
               </div>
@@ -539,11 +539,11 @@ export default function About({ aboutData }: { aboutData: AboutData }) {
         <section className="py-20 lg:py-[120px]">
           <div className="container mx-auto px-4">
             <div className="wow fadeInUp" data-wow-delay=".8s">
-              <h2 className="mb-8 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2] text-center">
+              <h2 className="mb-8 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2] text-center" style={{ display: 'none' }}>
                 {t(language, "about.coreMandates.title")}
               </h2>
 
-              <div className="mb-12 text-center">
+              <div className="mb-12 text-center" style={{ display: 'none' }}>
                 <div className="mx-auto max-w-4xl p-8 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
                   <h3 className="mb-4 text-2xl font-bold text-dark dark:text-white">
                     {t(language, "about.coreMandates.visionTitle")}
