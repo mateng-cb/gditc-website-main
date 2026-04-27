@@ -192,6 +192,7 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
         }
       `}</style>
       
+
       {/* Hero Section - 视频背景（减去导航栏高度 96px） */}
       <div className="relative h-[calc(100vh-96px)] overflow-hidden">
         {/* 背景视频 */}
@@ -231,6 +232,7 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
           </Link> */}
         </div>
       </div>
+
 
       {/* ========== 原轮播图代码（已注释）========== */}
       {/* 
