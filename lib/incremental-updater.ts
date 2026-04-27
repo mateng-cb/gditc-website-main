@@ -60,7 +60,7 @@ export class IncrementalUpdater {
 
   // 获取最新数据
   private async fetchLatestData() {
-    const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api';
+    const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://top.gditc.org/api';
     
     const [articles, events, sectors, resources] = await Promise.all([
       this.fetchData(`${apiUrl}/articles?populate=*&sort=publishedAt:desc&pagination[limit]=12`),

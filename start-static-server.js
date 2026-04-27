@@ -167,7 +167,7 @@ app.post(/^\/api\/rebuild-trigger\/?$/, (req, res) => {
 
 // 会员申请表单提交 API（需在 app.get('*') 之前注册，支持带/不带尾部斜杠）
 app.post(/^\/api\/join-us\/submit\/?$/, (req, res) => {
-  const strapiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api').replace(/\/$/, '');
+  const strapiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://top.gditc.org/api').replace(/\/$/, '');
   const strapiToken = process.env.STRAPI_API_TOKEN;
 
   if (!strapiToken) {

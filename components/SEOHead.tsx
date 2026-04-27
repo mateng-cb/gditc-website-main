@@ -100,7 +100,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       {/* 预连接优化 */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="preconnect" href="https://wonderful-serenity-47deffe3a2.strapiapp.com" />
+      <link rel="preconnect" href="https://top.gditc.org" />
       <link rel="preconnect" href="https://cdn.gditc.org" />
       
       {/* DNS 预解析 */}

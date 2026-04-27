@@ -12,7 +12,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
     domains: [
-      'wonderful-serenity-47deffe3a2.strapiapp.com',
+      'top.gditc.org',
       'cdn.gditc.org'  // 添加CDN域名
     ]
   },

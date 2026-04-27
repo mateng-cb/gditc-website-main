@@ -15,7 +15,7 @@ if (fs.existsSync(envPath)) {
 } else {
   // 创建 .env.local 文件
   const envContent = `# Strapi CMS 配置
-NEXT_PUBLIC_STRAPI_API_URL=https://wonderful-serenity-47deffe3a2.strapiapp.com/api
+NEXT_PUBLIC_STRAPI_API_URL=https://top.gditc.org/api
 STRAPI_API_TOKEN=your_readonly_token_here
 
 # 站点配置

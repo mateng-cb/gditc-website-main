@@ -7,7 +7,7 @@ import axios from 'axios';
 
 // 创建客户端API实例
 const clientAPI = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api',
+  baseURL: process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://top.gditc.org/api',
   headers: {
     'Content-Type': 'application/json',
   },

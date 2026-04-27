@@ -3,7 +3,8 @@
  */
 
 const CDN_BASE_URL = 'https://cdn.gditc.org';
-const STRAPI_BASE_URL = 'wonderful-serenity-47deffe3a2.strapiapp.com';
+const STRAPI_LEGACY_HOST = 'wonderful-serenity-47deffe3a2.strapiapp.com';
+const STRAPI_MEDIA_HOST = 'top.gditc.org';
 
 /**
  * 转换单个图片URL为CDN地址
@@ -16,9 +17,11 @@ export const convertToCDN = (url: string): string => {
     return `${CDN_BASE_URL}${url}`;
   }
   
-  // 如果包含strapiapp.com，替换为CDN域名
-  if (url.includes(STRAPI_BASE_URL)) {
-    return url.replace(STRAPI_BASE_URL, 'cdn.gditc.org');
+  if (url.includes(STRAPI_LEGACY_HOST)) {
+    return url.replace(STRAPI_LEGACY_HOST, 'cdn.gditc.org');
+  }
+  if (url.includes(STRAPI_MEDIA_HOST)) {
+    return url.replace(STRAPI_MEDIA_HOST, 'cdn.gditc.org');
   }
   
   // 其他情况返回原始URL

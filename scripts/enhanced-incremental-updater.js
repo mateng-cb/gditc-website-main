@@ -8,7 +8,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 
 class EnhancedIncrementalUpdater {
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api';
+    this.apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://top.gditc.org/api';
     this.updateInterval = parseInt(process.env.UPDATE_INTERVAL) || 600000; // 10分钟
     this.isUpdating = false;
     this.cacheFile = path.join(__dirname, '..', 'logs', 'incremental-cache.json');

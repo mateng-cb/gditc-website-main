@@ -59,7 +59,7 @@ cp env.example .env.local
 
 ```env
 # Strapi CMS 配置
-NEXT_PUBLIC_STRAPI_API_URL=https://wonderful-serenity-47deffe3a2.strapiapp.com/api
+NEXT_PUBLIC_STRAPI_API_URL=https://top.gditc.org/api
 STRAPI_API_TOKEN=your_api_token_here
 
 # 站点配置
@@ -155,7 +155,7 @@ npm run build
 在 Cloudflare Pages 项目设置中添加：
 
 ```
-NEXT_PUBLIC_STRAPI_API_URL = https://wonderful-serenity-47deffe3a2.strapiapp.com/api
+NEXT_PUBLIC_STRAPI_API_URL = https://top.gditc.org/api
 STRAPI_API_TOKEN = your_api_token_here
 NEXT_PUBLIC_SITE_URL = https://gditc.org
 ```
@@ -312,7 +312,7 @@ nano .env.auto-update
 **`.env.local` 配置：**
 ```env
 # Strapi CMS 配置
-NEXT_PUBLIC_STRAPI_API_URL=https://wonderful-serenity-47deffe3a2.strapiapp.com/api
+NEXT_PUBLIC_STRAPI_API_URL=https://top.gditc.org/api
 STRAPI_API_TOKEN=your_api_token_here
 
 # 站点配置

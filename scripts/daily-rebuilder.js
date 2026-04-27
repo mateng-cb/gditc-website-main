@@ -8,7 +8,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 
 class DailyRebuilder {
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api';
+    this.apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://top.gditc.org/api';
     this.logFile = path.join(__dirname, '..', 'logs', 'daily-rebuild.log');
     this.lastRebuildFile = path.join(__dirname, '..', 'logs', 'last-daily-rebuild.json');
     
