@@ -195,23 +195,26 @@ export default function Home({ sectors, homeData, events = [] }: HomeProps) {
 
       {/* Hero Section - 视频背景（减去导航栏高度 96px） */}
       <div className="relative h-[calc(100vh-96px)] overflow-hidden">
-        {/* 背景视频 */}
+        {/* 视频加载前：主题色底，无 poster 占位图 */}
+        <div
+          className="absolute inset-0 z-0 bg-primary"
+          aria-hidden
+        />
         <video
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 z-[1] w-full h-full object-cover"
           autoPlay
           muted
           loop
           playsInline
-          poster="/images/hero/hero-image.jpg"
         >
           {/* 视频文件放在 public/videos/ 目录下 */}
           <source src="/videos/DITC.mp4" type="video/mp4" />
-          {/* 如果浏览器不支持视频，显示背景图 */}
+          {/* 不支持 video 时由下层主题色背景呈现 */}
           Your browser does not support the video tag.
         </video>
         
         {/* 半透明遮罩层 */}
-        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="absolute inset-0 z-[2] bg-black/50" aria-hidden />
         
         {/* 内容层 */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
