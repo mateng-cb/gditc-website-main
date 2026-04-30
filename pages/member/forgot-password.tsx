@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Layout from '../../components/Layout'
 import SEOHead from '../../components/SEOHead'
 import PageBanner from '../../components/PageBanner'
+import { memberFetch } from '../../lib/member-client'
 
 export default function MemberForgotPassword() {
   const [email, setEmail] = useState('')
@@ -16,15 +17,14 @@ export default function MemberForgotPassword() {
     setMessage('')
     setLoading(true)
     try {
-      const res = await fetch('/api/forgotpwd', {
+      const res = await memberFetch('/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
         body: JSON.stringify({ email: email.trim() }),
       })
       const json = await res.json()
-      if (json.success) setMessage(json.message || '若邮箱已注册，将收到重置邮件')
-      else setError(json.message || '发送失败')
+      if (res.ok) setMessage('若邮箱已注册，将收到重置邮件')
+      else setError(json?.error?.message || json?.message || '发送失败')
     } catch {
       setError('网络错误')
     } finally {

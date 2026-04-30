@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { t } from '../lib/translations';
 import { useLanguage } from '../pages/_app';
+import { memberFetch } from '../lib/member-client';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,9 +19,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetch('/api/member/me', { credentials: 'same-origin' });
+        const r = await memberFetch('/member-profiles/me');
         const j = await r.json();
-        if (cancelled || !j?.success || !j?.data) {
+        if (cancelled || !r.ok || !j?.data) {
           if (!cancelled) setMemberNavLabel(null);
           return;
         }

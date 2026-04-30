@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Layout from '../../components/Layout'
 import SEOHead from '../../components/SEOHead'
 import PageBanner from '../../components/PageBanner'
+import { memberFetch, setMemberToken } from '../../lib/member-client'
 
 export default function MemberLogin() {
   const router = useRouter()
@@ -16,9 +17,9 @@ export default function MemberLogin() {
     let cancelled = false
     ;(async () => {
       try {
-        const r = await fetch('/api/member/me', { credentials: 'same-origin' })
+        const r = await memberFetch('/member-profiles/me')
         const j = await r.json()
-        if (!cancelled && j.success && j.data) {
+        if (!cancelled && r.ok && j?.data) {
           router.replace('/member/center')
         }
       } catch {
@@ -35,17 +36,17 @@ export default function MemberLogin() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('/api/member/auth/login', {
+      const res = await memberFetch('/auth/local', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
         body: JSON.stringify({ identifier: identifier.trim(), password }),
       })
       const json = await res.json()
-      if (!json.success) {
-        setError(json.message || '登录失败')
+      if (!res.ok || !json?.jwt) {
+        setError(json?.error?.message || '登录失败')
         return
       }
+      setMemberToken(json.jwt)
       const redir = typeof router.query.redirect === 'string' ? router.query.redirect : '/member/center'
       await router.push(redir.startsWith('/') ? redir : '/member/center')
     } catch {

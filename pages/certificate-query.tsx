@@ -4,6 +4,7 @@ import Layout from '../components/Layout'
 import SEOHead from '../components/SEOHead'
 import PageBanner from '../components/PageBanner'
 import { useLanguage } from './_app'
+import { getStrapiApiBase, getStrapiOrigin } from '../lib/member-client'
 
 interface CertificateResult {
   year: string
@@ -39,11 +40,18 @@ export default function CertificateQuery() {
         idNumber: idNumber.trim(),
         certificateNumber: certificateNumber.trim(),
       })
-      const res = await fetch(`/api/certificate-query?${params}`)
+      const res = await fetch(`${getStrapiApiBase()}/certificate-query?${params}`)
       const json = await res.json()
 
-      if (json.success && Array.isArray(json.data)) {
-        setResults(json.data)
+      if (res.ok && json?.data && Array.isArray(json.data)) {
+        const data = json.data.map((item: CertificateResult) => {
+          let certificateUrl = item.certificateUrl
+          if (certificateUrl && !certificateUrl.startsWith('http')) {
+            certificateUrl = `${getStrapiOrigin()}${certificateUrl}`
+          }
+          return { ...item, certificateUrl }
+        })
+        setResults(data)
       } else {
         setResults([])
       }
@@ -61,9 +69,11 @@ export default function CertificateQuery() {
   }
 
   const handleDownload = (url: string, fileName?: string) => {
-    const downloadUrl = `/api/certificate-download?url=${encodeURIComponent(url)}${fileName ? `&filename=${encodeURIComponent(fileName)}` : ''}`
     const a = document.createElement('a')
-    a.href = downloadUrl
+    a.href = url
+    if (fileName) a.download = fileName
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
     a.style.display = 'none'
     document.body.appendChild(a)
     a.click()

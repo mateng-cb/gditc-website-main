@@ -13,14 +13,7 @@ const clientAPI = axios.create({
   },
 });
 
-// 添加请求拦截器
-clientAPI.interceptors.request.use((config) => {
-  const token = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
-  if (token && token !== 'your_api_token_here') {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// 客户端仅访问公开接口，不读取任何私密 Token。
 
 // 添加响应拦截器
 clientAPI.interceptors.response.use(

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Layout from '../../components/Layout'
 import SEOHead from '../../components/SEOHead'
 import PageBanner from '../../components/PageBanner'
+import { memberFetch } from '../../lib/member-client'
 
 export default function MemberResetPassword() {
   const router = useRouter()
@@ -33,18 +34,17 @@ export default function MemberResetPassword() {
     }
     setLoading(true)
     try {
-      const res = await fetch('/api/member/auth/reset-password', {
+      const res = await memberFetch('/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
         body: JSON.stringify({ code, password, passwordConfirmation }),
       })
       const json = await res.json()
-      if (json.success) {
-        setMessage(json.message || '密码已重置')
+      if (res.ok) {
+        setMessage('密码已重置')
         setTimeout(() => router.push('/member/login'), 2000)
       } else {
-        setError(json.message || '重置失败')
+        setError(json?.error?.message || json?.message || '重置失败')
       }
     } catch {
       setError('网络错误')

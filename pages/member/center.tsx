@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import SEOHead from '../../components/SEOHead'
 import PageBanner from '../../components/PageBanner'
+import { clearMemberToken, getStrapiOrigin, memberFetch } from '../../lib/member-client'
 
 interface ExpertRow {
   documentId: string
@@ -48,9 +49,9 @@ export default function MemberCenter() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/member/me', { credentials: 'same-origin' })
+      const res = await memberFetch('/member-profiles/me')
       const json = await res.json()
-      if (res.status === 401 || !json.success) {
+      if (res.status === 401 || !res.ok || !json?.data) {
         router.replace(`/member/login?redirect=${encodeURIComponent('/member/center')}`)
         return
       }
@@ -73,18 +74,17 @@ export default function MemberCenter() {
     setSaveMsg('')
     setSaving(true)
     try {
-      const res = await fetch('/api/member/me/contact', {
+      const res = await memberFetch('/member-profiles/me/contact', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
         body: JSON.stringify({ contactName, contactPhone }),
       })
       const json = await res.json()
-      if (json.success) {
+      if (res.ok) {
         setSaveMsg('Saved')
         setProfile((p) => (p ? { ...p, contactName, contactPhone } : p))
       } else {
-        setSaveMsg(json.message || 'Save failed')
+        setSaveMsg(json?.error?.message || json?.message || 'Save failed')
       }
     } catch {
       setSaveMsg('Network error')
@@ -94,14 +94,17 @@ export default function MemberCenter() {
   }
 
   const logout = async () => {
-    await fetch('/api/member/auth/logout', { method: 'POST', credentials: 'same-origin' })
+    clearMemberToken()
     router.push('/member/login')
   }
 
-  const triggerDownload = (kind: 'expert' | 'ditc-cert', documentId: string) => {
-    const url = `/api/member/download?kind=${kind}&documentId=${encodeURIComponent(documentId)}`
+  const triggerDownload = (rawUrl?: string) => {
+    if (!rawUrl) return
+    const url = rawUrl.startsWith('http') ? rawUrl : `${getStrapiOrigin()}${rawUrl}`
     const a = document.createElement('a')
     a.href = url
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
     a.style.display = 'none'
     document.body.appendChild(a)
     a.click()
@@ -221,7 +224,7 @@ export default function MemberCenter() {
                                 {ex.appointmentLetter?.url ? (
                                   <button
                                     type="button"
-                                    onClick={() => triggerDownload('expert', ex.documentId)}
+                                    onClick={() => triggerDownload(ex.appointmentLetter?.url)}
                                     className="text-sm text-primary hover:underline whitespace-nowrap"
                                   >
                                     Download
@@ -266,7 +269,7 @@ export default function MemberCenter() {
                                 {c.certificateFile?.url ? (
                                   <button
                                     type="button"
-                                    onClick={() => triggerDownload('ditc-cert', c.documentId)}
+                                    onClick={() => triggerDownload(c.certificateFile?.url)}
                                     className="text-sm text-primary hover:underline whitespace-nowrap"
                                   >
                                     Download

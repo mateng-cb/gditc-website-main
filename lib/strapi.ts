@@ -10,19 +10,10 @@ const strapiAPI = axios.create({
 
 // 添加请求拦截器来处理认证
 strapiAPI.interceptors.request.use((config) => {
-  const token = process.env.STRAPI_API_TOKEN;
-  console.log('🔑 API Token check:', {
-    hasToken: !!token,
-    tokenLength: token?.length || 0,
-    tokenPreview: token ? `${token.substring(0, 10)}...` : 'null',
-    isDefaultToken: token === 'your_readonly_token_here' || token === 'your_api_token_here'
-  });
-  
+  // 仅在服务端读取私密 Token，避免任何客户端打包泄露风险。
+  const token = typeof window === 'undefined' ? process.env.STRAPI_API_TOKEN : '';
   if (token && token !== 'your_readonly_token_here' && token !== 'your_api_token_here') {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('✅ Authorization header added');
-  } else {
-    console.warn('⚠️ No valid API token found or using default placeholder');
   }
   return config;
 });
