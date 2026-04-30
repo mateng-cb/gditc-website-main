@@ -6,6 +6,24 @@ import SEOHead from '../../components/SEOHead'
 import PageBanner from '../../components/PageBanner'
 import { memberFetch, setMemberToken } from '../../lib/member-client'
 
+function getFriendlyLoginError(message?: string) {
+  const msg = (message || '').toLowerCase()
+  if (!msg) return 'Sign in failed. Please try again.'
+  if (msg.includes('invalid identifier') || msg.includes('invalid') || msg.includes('password')) {
+    return 'Incorrect email or password. Please try again.'
+  }
+  if (msg.includes('blocked')) {
+    return 'This account is blocked. Please contact support.'
+  }
+  if (msg.includes('too many') || msg.includes('rate limit')) {
+    return 'Too many attempts. Please try again later.'
+  }
+  if (msg.includes('network') || msg.includes('timeout')) {
+    return 'Network error. Please check your connection and try again.'
+  }
+  return 'Sign in failed. Please check your email and password.'
+}
+
 export default function MemberLogin() {
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
@@ -43,14 +61,14 @@ export default function MemberLogin() {
       })
       const json = await res.json()
       if (!res.ok || !json?.jwt) {
-        setError(json?.error?.message || '登录失败')
+        setError(getFriendlyLoginError(json?.error?.message || json?.message))
         return
       }
       setMemberToken(json.jwt)
       const redir = typeof router.query.redirect === 'string' ? router.query.redirect : '/member/center'
       await router.push(redir.startsWith('/') ? redir : '/member/center')
     } catch {
-      setError('网络错误')
+      setError('Network error. Please try again later.')
     } finally {
       setLoading(false)
     }

@@ -11,9 +11,18 @@ const strapiAPI = axios.create({
 // 添加请求拦截器来处理认证
 strapiAPI.interceptors.request.use((config) => {
   // 仅在服务端读取私密 Token，避免任何客户端打包泄露风险。
-  const token = typeof window === 'undefined' ? process.env.STRAPI_API_TOKEN : '';
-  if (token && token !== 'your_readonly_token_here' && token !== 'your_api_token_here') {
+  const rawToken = typeof window === 'undefined' ? process.env.STRAPI_API_TOKEN : '';
+  const token = (rawToken || '').trim();
+  const isPlaceholder =
+    token === 'your_readonly_token_here' ||
+    token === 'your_api_token_here' ||
+    token === 'REPLACE_WITH_YOUR_READONLY_TOKEN';
+
+  if (token && !isPlaceholder) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else if (config.headers && 'Authorization' in config.headers) {
+    // token 为空时，显式移除 Authorization，走 Public 权限访问。
+    delete config.headers.Authorization;
   }
   return config;
 });
