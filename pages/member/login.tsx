@@ -63,7 +63,7 @@ export default function MemberLogin() {
         <PageBanner title="Member Login" description="Sign in with your registered email and password" showDivider />
         <section className="pt-[10rem] pb-[10rem] dark:bg-dark">
           <div className="container mx-auto px-4 max-w-md">
-            <form onSubmit={onSubmit} className="space-y-4 bg-white dark:bg-dark-2 p-8 rounded-lg shadow">
+            <form onSubmit={onSubmit} className="space-y-4 bg-white dark:bg-dark-2 p-8 rounded-lg shadow-xl">
               {error && (
                 <p className="text-sm text-red-600 dark:text-red-400" role="alert">
                   {error}
