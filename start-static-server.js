@@ -6,8 +6,11 @@ const express = require('express');
 const fs = require('fs');
 const formidable = require('formidable').default || require('formidable').formidable || require('formidable');
 const axios = require('axios');
+const memberApi = require('./lib/member-api-handlers');
 const app = express();
 const PORT = process.env.PORT || 6001;
+
+app.use(express.json({ limit: '512kb' }));
 
 // 静态文件目录
 const staticDir = path.join(__dirname, 'out');
@@ -35,6 +38,56 @@ const FORM_FIELDS = [
   'orgIntroduction', 'applicantNameChinese', 'applicantNameEnglish', 'gender',
   'dateOfBirth', 'nationality', 'jobTitle', 'phone', 'email', 'englishLevel'
 ];
+
+// —— 会员中心 API（静态导出模式下由本服务提供，与 pages/api 逻辑一致）——
+async function sendMemberResult(res, result) {
+  if (result.cookies) memberApi.applyCookies(res, result.cookies);
+  if (result.binary && result.buffer) {
+    res.setHeader('Content-Type', result.contentType || 'application/octet-stream');
+    const name = (result.filename || 'file').replace(/[^\w.\-\u4e00-\u9fa5]+/g, '_');
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(name)}`);
+    return res.status(result.status).send(result.buffer);
+  }
+  res.setHeader('Content-Type', 'application/json');
+  return res.status(result.status).json(result.body);
+}
+
+app.post(/^\/api\/member\/auth\/login\/?$/, async (req, res) => {
+  const result = await memberApi.login(req, req.body || {});
+  return sendMemberResult(res, result);
+});
+app.post(/^\/api\/member\/auth\/logout\/?$/, async (req, res) => {
+  const result = await memberApi.logout();
+  return sendMemberResult(res, result);
+});
+app.post(/^\/api\/member\/auth\/forgot-password\/?$/, async (req, res) => {
+  const result = await memberApi.forgotPassword(req.body || {});
+  return sendMemberResult(res, result);
+});
+app.post(/^\/api\/member-auth-forgot-password\/?$/, async (req, res) => {
+  const result = await memberApi.forgotPassword(req.body || {});
+  return sendMemberResult(res, result);
+});
+app.post(/^\/api\/forgotpwd\/?$/, async (req, res) => {
+  const result = await memberApi.forgotPassword(req.body || {});
+  return sendMemberResult(res, result);
+});
+app.post(/^\/api\/member\/auth\/reset-password\/?$/, async (req, res) => {
+  const result = await memberApi.resetPassword(req.body || {});
+  return sendMemberResult(res, result);
+});
+app.get(/^\/api\/member\/me\/?$/, async (req, res) => {
+  const result = await memberApi.me(req);
+  return sendMemberResult(res, result);
+});
+app.put(/^\/api\/member\/me\/contact\/?$/, async (req, res) => {
+  const result = await memberApi.updateContact(req, req.body || {});
+  return sendMemberResult(res, result);
+});
+app.get(/^\/api\/member\/download\/?$/, async (req, res) => {
+  const result = await memberApi.download(req);
+  return sendMemberResult(res, result);
+});
 
 // 证书查询 API（需在 app.get('*') 之前注册）
 app.get(/^\/api\/certificate-query\/?$/, async (req, res) => {

@@ -5,10 +5,7 @@ const nextConfig = {
   // 图片配置
   images: {
     unoptimized: true,
-    domains: [
-      'top.gditc.org',
-      'cdn.gditc.org'
-    ]
+    domains: ['top.gditc.org', 'cdn.gditc.org']
   },
   // 环境变量
   env: {

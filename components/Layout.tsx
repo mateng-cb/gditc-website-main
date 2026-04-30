@@ -11,7 +11,30 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [memberNavLabel, setMemberNavLabel] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch('/api/member/me', { credentials: 'same-origin' });
+        const j = await r.json();
+        if (cancelled || !j?.success || !j?.data) {
+          if (!cancelled) setMemberNavLabel(null);
+          return;
+        }
+        const company = j.data.companyName as string | undefined;
+        const email = j.data.user?.email as string | undefined;
+        if (!cancelled) setMemberNavLabel(company || email || 'Member');
+      } catch {
+        if (!cancelled) setMemberNavLabel(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router.pathname]);
 
   // 导航菜单项 - 更新为新的栏目名称
   const navigationItems = [
@@ -81,7 +104,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {item.label}
                 </Link>
               ))}
-              
+              {memberNavLabel ? (
+                <Link
+                  href="/member/center"
+                  className={`font-medium transition-colors dark:hover:text-primary ${
+                    router.pathname.startsWith('/member') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 hover:text-primary dark:text-white'
+                  }`}
+                >
+                  {memberNavLabel}
+                </Link>
+              ) : (
+                <Link
+                  href="/member/login"
+                  className="font-medium text-gray-900 hover:text-primary dark:text-white dark:hover:text-primary"
+                >
+                  Member
+                </Link>
+              )}
             </div>
 
             {/* 右侧控制按钮 */}
@@ -112,7 +151,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {item.label}
                 </Link>
               ))}
-              
+              <Link
+                href={memberNavLabel ? '/member/center' : '/member/login'}
+                className="block py-2 text-gray-700 hover:text-primary dark:text-gray-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {memberNavLabel ? memberNavLabel : 'Member'}
+              </Link>
             </div>
           )}
         </nav>

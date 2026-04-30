@@ -374,7 +374,7 @@ export default function JoinUs({ translations = {}, joinusData }: JoinUsProps) {
           title={t(language, 'joinUs.howToJoin')}
           description={t(language, 'joinUs.becomePartOf')}
         >
-          {/* 面包屑导航 */}
+          {/* 面包屑导航 使用max-w-4xl px-4 与方式一使用相同 max-w-4xl 对齐 */}
           <ul className="flex items-center justify-center gap-[10px]">
             <li><a href="/" className="text-base font-medium text-dark dark:text-white">{t(language, 'common.home')}</a></li>
             <li><span className="text-body-color dark:text-dark-6"> / </span></li>
