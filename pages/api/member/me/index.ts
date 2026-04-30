@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const memberApi = require('../../../lib/member-api-handlers');
+const memberApi = require('../../../../lib/member-api-handlers');
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {

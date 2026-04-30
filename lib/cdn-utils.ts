@@ -3,7 +3,7 @@
  */
 
 const CDN_BASE_URL = 'https://cdn.gditc.org';
-const STRAPI_BASE_URL = 'wonderful-serenity-47deffe3a2.strapiapp.com';
+const STRAPI_BASE_URL = 'top.gditc.org';
 
 /**
  * 转换单个图片URL为CDN地址
@@ -16,7 +16,7 @@ export const convertToCDN = (url: string): string => {
     return `${CDN_BASE_URL}${url}`;
   }
   
-  // 如果包含strapiapp.com，替换为CDN域名
+  // 若媒体 URL 仍指向 Strapi 主机名，替换为 CDN 域名
   if (url.includes(STRAPI_BASE_URL)) {
     return url.replace(STRAPI_BASE_URL, 'cdn.gditc.org');
   }

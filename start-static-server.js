@@ -64,6 +64,14 @@ app.post(/^\/api\/member\/auth\/forgot-password\/?$/, async (req, res) => {
   const result = await memberApi.forgotPassword(req.body || {});
   return sendMemberResult(res, result);
 });
+app.post(/^\/api\/member-auth-forgot-password\/?$/, async (req, res) => {
+  const result = await memberApi.forgotPassword(req.body || {});
+  return sendMemberResult(res, result);
+});
+app.post(/^\/api\/forgotpwd\/?$/, async (req, res) => {
+  const result = await memberApi.forgotPassword(req.body || {});
+  return sendMemberResult(res, result);
+});
 app.post(/^\/api\/member\/auth\/reset-password\/?$/, async (req, res) => {
   const result = await memberApi.resetPassword(req.body || {});
   return sendMemberResult(res, result);
@@ -212,7 +220,7 @@ app.post(/^\/api\/rebuild-trigger\/?$/, (req, res) => {
 
 // 会员申请表单提交 API（需在 app.get('*') 之前注册，支持带/不带尾部斜杠）
 app.post(/^\/api\/join-us\/submit\/?$/, (req, res) => {
-  const strapiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api').replace(/\/$/, '');
+  const strapiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://top.gditc.org/api').replace(/\/$/, '');
   const strapiToken = process.env.STRAPI_API_TOKEN;
 
   if (!strapiToken) {

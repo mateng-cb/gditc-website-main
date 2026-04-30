@@ -23,6 +23,10 @@ export default function MemberResetPassword() {
     e.preventDefault()
     setError('')
     setMessage('')
+    if (!code) {
+      setError('重置链接已失效或未携带 code')
+      return
+    }
     if (password !== passwordConfirmation) {
       setError('两次输入的密码不一致')
       return
@@ -53,21 +57,12 @@ export default function MemberResetPassword() {
     <>
       <SEOHead title="Reset password" description="Set a new password" />
       <Layout>
-        <PageBanner title="Reset password" description="Enter the code from your email and a new password" showDivider />
-        <section className="pt-8 pb-20 dark:bg-dark">
+        <PageBanner title="Reset password" description="Enter your new password" showDivider />
+        <section className="pt-[10rem] pb-[10rem] dark:bg-dark">
           <div className="container mx-auto px-4 max-w-md">
             <form onSubmit={onSubmit} className="space-y-4 bg-white dark:bg-dark-2 p-8 rounded-lg shadow">
               {error && <p className="text-sm text-red-600">{error}</p>}
               {message && <p className="text-sm text-green-600">{message}</p>}
-              <div>
-                <label className="block text-sm font-medium mb-1">Reset code</label>
-                <input
-                  className="w-full rounded border px-3 py-2 dark:bg-dark dark:text-white dark:border-dark-3"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  required
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">New password</label>
                 <input

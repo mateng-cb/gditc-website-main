@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
 import Layout from '../../components/Layout'
 import SEOHead from '../../components/SEOHead'
 import PageBanner from '../../components/PageBanner'
@@ -12,11 +11,13 @@ interface ExpertRow {
   appointmentLetter?: { url?: string; name?: string; ext?: string }
 }
 
-interface CertRow {
+interface DitcMemberCertRow {
   documentId: string
-  certificateNumber?: string
-  qualification?: string
-  issueDate?: string
+  companyName?: string
+  membershipCategory?: string
+  validFrom?: string
+  validTo?: string
+  certNo?: string
   certificateFile?: { url?: string; name?: string; ext?: string }
 }
 
@@ -24,10 +25,12 @@ interface ProfileData {
   documentId?: string
   companyName?: string
   membershipLevel?: string
+  country?: string
+  membershipCategory?: string
   contactName?: string
   contactPhone?: string
   experts?: ExpertRow[]
-  certificates?: CertRow[]
+  ditcMemberCertificates?: DitcMemberCertRow[]
   user?: { email?: string; username?: string }
 }
 
@@ -78,13 +81,13 @@ export default function MemberCenter() {
       })
       const json = await res.json()
       if (json.success) {
-        setSaveMsg('已保存')
+        setSaveMsg('Saved')
         setProfile((p) => (p ? { ...p, contactName, contactPhone } : p))
       } else {
-        setSaveMsg(json.message || '保存失败')
+        setSaveMsg(json.message || 'Save failed')
       }
     } catch {
-      setSaveMsg('网络错误')
+      setSaveMsg('Network error')
     } finally {
       setSaving(false)
     }
@@ -95,7 +98,7 @@ export default function MemberCenter() {
     router.push('/member/login')
   }
 
-  const triggerDownload = (kind: 'expert' | 'certificate', documentId: string) => {
+  const triggerDownload = (kind: 'expert' | 'ditc-cert', documentId: string) => {
     const url = `/api/member/download?kind=${kind}&documentId=${encodeURIComponent(documentId)}`
     const a = document.createElement('a')
     a.href = url
@@ -103,6 +106,18 @@ export default function MemberCenter() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
+  }
+
+  const formatValidRange = (from?: string, to?: string) => {
+    if (!from && !to) return '—'
+    const opt: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' }
+    try {
+      const a = from ? new Date(from).toLocaleDateString(undefined, opt) : '—'
+      const b = to ? new Date(to).toLocaleDateString(undefined, opt) : '—'
+      return `${a} – ${b}`
+    } catch {
+      return '—'
+    }
   }
 
   const displayName = profile?.companyName || profile?.user?.email || 'Member'
@@ -125,39 +140,52 @@ export default function MemberCenter() {
 
             {!loading && profile && (
               <>
-                <div className="bg-white dark:bg-dark-2 rounded-lg shadow p-6 space-y-4">
+                <div className="bg-white dark:bg-dark-2 rounded-lg shadow-xl p-6 space-y-4">
                   <h2 className="text-lg font-semibold text-dark dark:text-white">Company & membership</h2>
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <dt className="text-body-color">Company</dt>
-                      <dd className="font-medium text-dark dark:text-white">{profile.companyName || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-body-color">Membership level</dt>
-                      <dd className="font-medium text-dark dark:text-white">{profile.membershipLevel || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-body-color">Contact name</dt>
-                      <dd>
-                        <input
-                          className="mt-1 w-full rounded border px-2 py-1 dark:bg-dark dark:text-white dark:border-dark-3"
-                          value={contactName}
-                          onChange={(e) => setContactName(e.target.value)}
-                        />
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-body-color">Contact phone</dt>
-                      <dd>
-                        <input
-                          className="mt-1 w-full rounded border px-2 py-1 dark:bg-dark dark:text-white dark:border-dark-3"
-                          value={contactPhone}
-                          onChange={(e) => setContactPhone(e.target.value)}
-                        />
-                      </dd>
-                    </div>
-                  </dl>
-                  <div className="flex items-center gap-3">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border border-gray-300 dark:border-gray-700">
+                      <tbody>
+                        <tr className="border-b border-gray-300 dark:border-gray-700">
+                          <td className="py-3 px-4 text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Company Name</td>
+                          <td className="py-3 px-4 font-medium text-dark dark:text-white">{profile.companyName || '—'}</td>
+                        </tr>
+                        <tr className="border-b border-gray-300 dark:border-gray-700">
+                          <td className="py-3 px-4 text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Country/Region</td>
+                          <td className="py-3 px-4 font-medium text-dark dark:text-white">{profile.country || '—'}</td>
+                        </tr>
+                        <tr className="border-b border-gray-300 dark:border-gray-700">
+                          <td className="py-3 px-4 text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Membership Category</td>
+                          <td className="py-3 px-4 font-medium text-dark dark:text-white">
+                            {profile.membershipCategory || profile.membershipLevel || '—'}
+                          </td>
+                        </tr>
+                        <tr className="border-b border-gray-300 dark:border-gray-700">
+                          <td className="py-3 px-4 text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Contact Name</td>
+                          <td className="py-3 px-4">
+                            <input
+                              className="w-full max-w-md rounded border border-gray-300 dark:border-gray-600 px-3 py-2 dark:bg-dark dark:text-white"
+                              value={contactName}
+                              onChange={(e) => setContactName(e.target.value)}
+                              autoComplete="name"
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 px-4 text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Phone Number</td>
+                          <td className="py-3 px-4">
+                            <input
+                              type="tel"
+                              className="w-full max-w-md rounded border border-gray-300 dark:border-gray-600 px-3 py-2 dark:bg-dark dark:text-white"
+                              value={contactPhone}
+                              onChange={(e) => setContactPhone(e.target.value)}
+                              autoComplete="tel"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
                     <button
                       type="button"
                       onClick={saveContact}
@@ -170,61 +198,90 @@ export default function MemberCenter() {
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-dark-2 rounded-lg shadow p-6">
-                  <h2 className="text-lg font-semibold text-dark dark:text-white mb-4">Experts & appointment letters</h2>
-                  {!profile.experts?.length && <p className="text-sm text-body-color">No expert records.</p>}
-                  <ul className="space-y-3">
-                    {(profile.experts || []).map((ex) => (
-                      <li key={ex.documentId} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 dark:border-dark-3 pb-3">
-                        <div>
-                          <p className="font-medium text-dark dark:text-white">{ex.fullName}</p>
-                          <p className="text-sm text-body-color">{ex.roleTitle || ''}</p>
-                        </div>
-                        {ex.appointmentLetter?.url && (
-                          <button
-                            type="button"
-                            onClick={() => triggerDownload('expert', ex.documentId)}
-                            className="text-sm text-primary hover:underline"
-                          >
-                            Download letter
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="bg-white dark:bg-dark-2 rounded-lg shadow-xl p-6 space-y-3">
+                  <h2 className="text-lg font-semibold text-dark dark:text-white">Experts</h2>
+                  {!profile.experts?.length ? (
+                    <p className="text-sm text-body-color">No expert records.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border border-gray-300 dark:border-gray-700">
+                        <thead>
+                          <tr className="text-left border-b border-gray-300 dark:border-gray-700">
+                            <th className="py-2 px-4 font-medium text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Expert</th>
+                            <th className="py-2 px-4 font-medium text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Role</th>
+                            <th className="py-2 px-4 font-medium text-body-color whitespace-nowrap">Letter</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(profile.experts || []).map((ex) => (
+                            <tr key={ex.documentId} className="border-b border-gray-300 dark:border-gray-700">
+                              <td className="py-3 px-4 font-medium text-dark dark:text-white whitespace-nowrap border-r border-gray-300 dark:border-gray-700">{ex.fullName}</td>
+                              <td className="py-3 px-4 text-body-color border-r border-gray-300 dark:border-gray-700">{ex.roleTitle || '—'}</td>
+                              <td className="py-3 px-4">
+                                {ex.appointmentLetter?.url ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => triggerDownload('expert', ex.documentId)}
+                                    className="text-sm text-primary hover:underline whitespace-nowrap"
+                                  >
+                                    Download
+                                  </button>
+                                ) : (
+                                  <span className="text-xs text-body-color">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
 
-                <div className="bg-white dark:bg-dark-2 rounded-lg shadow p-6">
-                  <h2 className="text-lg font-semibold text-dark dark:text-white mb-4">Member certificates</h2>
-                  {!profile.certificates?.length && <p className="text-sm text-body-color">No certificates linked.</p>}
-                  <ul className="space-y-3">
-                    {(profile.certificates || []).map((c) => (
-                      <li key={c.documentId} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 dark:border-dark-3 pb-3">
-                        <div>
-                          <p className="font-medium text-dark dark:text-white">{c.certificateNumber}</p>
-                          <p className="text-sm text-body-color">{c.qualification}</p>
-                          <p className="text-xs text-body-color">{c.issueDate}</p>
-                        </div>
-                        {c.certificateFile?.url && (
-                          <button
-                            type="button"
-                            onClick={() => triggerDownload('certificate', c.documentId)}
-                            className="text-sm text-primary hover:underline"
-                          >
-                            Download
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="bg-white dark:bg-dark-2 rounded-lg shadow-xl p-6 space-y-3">
+                  <h2 className="text-lg font-semibold text-dark dark:text-white">DITC Membership Certificate Download</h2>
+                  {!profile.ditcMemberCertificates?.length ? (
+                    <p className="text-sm text-body-color">No DITC member certificate linked.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border border-gray-300 dark:border-gray-700">
+                        <thead>
+                          <tr className="text-left border-b border-gray-300 dark:border-gray-700">
+                            <th className="py-2 px-4 font-medium text-body-color whitespace-nowrap border-r border-gray-300 dark:border-gray-700">Certificate</th>
+                            <th className="py-2 px-4 font-medium text-body-color whitespace-nowrap">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(profile.ditcMemberCertificates || []).map((c) => (
+                            <tr key={c.documentId} className="border-b border-gray-300 dark:border-gray-700">
+                              <td className="py-3 px-4 border-r border-gray-300 dark:border-gray-700">
+                                <div className="font-medium text-dark dark:text-white whitespace-nowrap">
+                                  {c.membershipCategory || 'DITC Member Certificate'}
+                                </div>
+                                <div className="text-xs text-body-color">
+                                  Cert. No. {c.certNo || '—'} · {formatValidRange(c.validFrom, c.validTo)}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                {c.certificateFile?.url ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => triggerDownload('ditc-cert', c.documentId)}
+                                    className="text-sm text-primary hover:underline whitespace-nowrap"
+                                  >
+                                    Download
+                                  </button>
+                                ) : (
+                                  <span className="text-xs text-body-color">File not uploaded</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
-
-                <p className="text-sm text-body-color">
-                  Public certificate lookup:{' '}
-                  <Link href="/certificate-query" className="text-primary hover:underline">
-                    Certificate query
-                  </Link>
-                </p>
               </>
             )}
           </div>

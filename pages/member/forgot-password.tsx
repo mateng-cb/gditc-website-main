@@ -16,7 +16,7 @@ export default function MemberForgotPassword() {
     setMessage('')
     setLoading(true)
     try {
-      const res = await fetch('/api/member/auth/forgot-password', {
+      const res = await fetch('/api/forgotpwd', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
@@ -37,7 +37,7 @@ export default function MemberForgotPassword() {
       <SEOHead title="Forgot password" description="Reset member password" />
       <Layout>
         <PageBanner title="Forgot password" description="Enter your registered email" showDivider />
-        <section className="pt-8 pb-20 dark:bg-dark">
+        <section className="pt-[10rem] pb-[10rem] dark:bg-dark">
           <div className="container mx-auto px-4 max-w-md">
             <form onSubmit={onSubmit} className="space-y-4 bg-white dark:bg-dark-2 p-8 rounded-lg shadow">
               {error && <p className="text-sm text-red-600">{error}</p>}

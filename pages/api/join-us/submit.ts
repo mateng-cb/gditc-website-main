@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL?.replace(/\/$/, '') || 'https://wonderful-serenity-47deffe3a2.strapiapp.com/api';
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL?.replace(/\/$/, '') || 'https://top.gditc.org/api';
   const strapiToken = process.env.STRAPI_API_TOKEN;
 
   if (!strapiToken) {
