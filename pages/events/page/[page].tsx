@@ -308,25 +308,19 @@ export const getStaticPaths: GetStaticPaths = async () => {
     console.log('🔄 开始生成 Events 静态路径...')
     
     // 获取所有活动数据来计算总页数
-    const [eventsEn, eventsZh] = await Promise.all([
-      getEvents(undefined, 'en'),
-      getEvents(undefined, 'zh-Hans')
-    ])
+    const eventsEn = await getEvents(undefined, 'en')
 
     console.log(`📊 Events 数据统计:`, {
-      eventsEn: eventsEn.length,
-      eventsZh: eventsZh.length
+      eventsEn: eventsEn.length
     })
 
     const eventsPerPage = 12
     const totalPagesEn = Math.ceil(eventsEn.length / eventsPerPage)
-    const totalPagesZh = Math.ceil(eventsZh.length / eventsPerPage)
-    const maxPages = Math.max(1, Math.max(totalPagesEn, totalPagesZh))
+    const maxPages = Math.max(1, totalPagesEn)
 
     console.log(`📄 分页计算:`, {
       eventsPerPage,
       totalPagesEn,
-      totalPagesZh,
       maxPages
     })
 
@@ -364,14 +358,10 @@ export const getStaticProps: GetStaticProps<EventsPageProps> = async ({ params }
     console.log(`🔄 生成 Events 页面数据 - 第 ${page} 页`)
 
     // 获取所有活动数据
-    const [eventsEn, eventsZh] = await Promise.all([
-      getEvents(undefined, 'en'),
-      getEvents(undefined, 'zh-Hans')
-    ])
+    const eventsEn = await getEvents(undefined, 'en')
 
     console.log(`📊 获取到的 Events 数据:`, {
       eventsEn: eventsEn.length,
-      eventsZh: eventsZh.length,
       page
     })
 
@@ -393,11 +383,7 @@ export const getStaticProps: GetStaticProps<EventsPageProps> = async ({ params }
       }))
     }
 
-    const cleanedEventsEn = formatEvents(eventsEn)
-    const cleanedEventsZh = formatEvents(eventsZh)
-
-    // 默认使用英文数据
-    const allEvents = cleanedEventsEn.length > 0 ? cleanedEventsEn : cleanedEventsZh
+    const allEvents = formatEvents(eventsEn)
     
     // 计算分页数据
     const totalEvents = allEvents.length

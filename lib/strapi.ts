@@ -45,6 +45,13 @@ strapiAPI.interceptors.response.use(
   }
 );
 
+/** Strapi i18n：始终带上 locale（含 en），避免未传时返回多语言或默认与预期不符 */
+function appendStrapiLocale(queryParams: URLSearchParams, locale: string) {
+  if (locale) {
+    queryParams.set('locale', locale);
+  }
+}
+
 // 响应数据类型定义 - 更新为Strapi 5格式
 export interface StrapiResponse<T> {
   data: (T & {
@@ -567,7 +574,7 @@ export const getAllPages = async (): Promise<{ slug: string }[]> => {
   try {
     // 先尝试从 articles 获取页面数据，因为 pages 端点可能不存在
     const response = await strapiAPI.get<StrapiResponse<{ slug: string }>>(
-      '/articles?fields[0]=slug'
+      '/articles?fields[0]=slug&locale=en'
     );
     
     // 安全地处理响应数据
@@ -609,9 +616,7 @@ export const getArticles = async (limit?: number, locale: string = 'en'): Promis
       queryParams.append('pagination[limit]', limit.toString());
     }
     
-    if (locale && locale !== 'en') {
-      queryParams.append('locale', locale);
-    }
+    appendStrapiLocale(queryParams, locale);
     
     const response = await strapiAPI.get<StrapiResponse<Article>>(
       `/articles?${queryParams.toString()}`
@@ -661,10 +666,7 @@ export const getArticles = async (limit?: number, locale: string = 'en'): Promis
 export const getArticleByDocumentId = async (documentId: string, locale: string = 'en'): Promise<Article | null> => {
   try {
     const queryParams = new URLSearchParams();
-    
-    if (locale && locale !== 'en') {
-      queryParams.append('locale', locale);
-    }
+    appendStrapiLocale(queryParams, locale);
     
     const url = `/articles/${documentId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await strapiAPI.get<StrapiSingleResponse<Article>>(url);
@@ -703,10 +705,13 @@ export const getArticleByDocumentId = async (documentId: string, locale: string 
 };
 
 // 根据slug获取文章（保留兼容性）
-export const getArticleBySlug = async (slug: string): Promise<Article | null> => {
+export const getArticleBySlug = async (slug: string, locale: string = 'en'): Promise<Article | null> => {
   try {
+    const queryParams = new URLSearchParams();
+    queryParams.append('filters[slug][$eq]', slug);
+    appendStrapiLocale(queryParams, locale);
     const response = await strapiAPI.get<StrapiResponse<Article>>(
-      `/articles?filters[slug][$eq]=${slug}`
+      `/articles?${queryParams.toString()}`
     );
     
     if (!response.data.data || response.data.data.length === 0) {
@@ -746,7 +751,7 @@ export const getArticleBySlug = async (slug: string): Promise<Article | null> =>
 export const getAllArticles = async (): Promise<{ slug: string }[]> => {
   try {
     const response = await strapiAPI.get<StrapiResponse<{ slug: string }>>(
-      '/articles?fields[0]=slug'
+      '/articles?fields[0]=slug&locale=en'
     );
     
     return response.data.data.map((article) => ({
@@ -767,11 +772,7 @@ export const getTraining = async (type?: string, locale: string = 'en'): Promise
       'populate': '*'
     });
     
-    // 如果指定了语言且不是默认语言，添加locale参数
-    if (locale && locale !== 'en') {
-      queryParams.append('locale', locale);
-      console.log(`🔄 使用 locale: ${locale}`);
-    }
+    appendStrapiLocale(queryParams, locale);
 
     console.log(`Fetching training with locale: ${locale}, type: ${type || 'all'}`);
     
@@ -879,13 +880,7 @@ export const getEvents = async (limit?: number, locale: string = 'en'): Promise<
     console.log(`🔄 正在获取Events数据 (${locale})...`);
     
     const queryParams = new URLSearchParams();
-    
-    if (locale && locale !== 'en') {
-      queryParams.append('locale', locale);
-      console.log(`🔄 使用 locale: ${locale}`);
-    } else {
-      console.log(`🔄 使用默认 locale: en`);
-    }
+    appendStrapiLocale(queryParams, locale);
     
     // 如果没有指定 limit，设置一个较大的值确保获取所有数据
     if (limit) {
@@ -983,9 +978,10 @@ export const getEvents = async (limit?: number, locale: string = 'en'): Promise<
 };
 
 // 获取标准列表
-export const getStandards = async (type?: string): Promise<Resource[]> => {
+export const getStandards = async (type?: string, locale: string = 'en'): Promise<Resource[]> => {
   try {
     const queryParams = new URLSearchParams();
+    appendStrapiLocale(queryParams, locale);
     
     if (type) {
       queryParams.append('filters[type][$eq]', type);
@@ -1213,11 +1209,7 @@ export const getCertifications = async (limit?: number, locale: string = 'en'): 
     console.log(`🔄 正在获取Certifications数据 (${locale})...`);
     
     const queryParams = new URLSearchParams();
-    
-    if (locale && locale !== 'en') {
-      queryParams.append('locale', locale);
-      console.log(`🔄 使用 locale: ${locale}`);
-    }
+    appendStrapiLocale(queryParams, locale);
     
     if (limit) {
       queryParams.append('pagination[limit]', limit.toString());
@@ -1330,10 +1322,7 @@ export const getTrainingById = async (artcileId: string): Promise<Sector | null>
 export const getSectorByDocumentId = async (documentId: string, locale: string = 'en'): Promise<Sector | null> => {
   try {
     const queryParams = new URLSearchParams();
-    
-    if (locale && locale !== 'en') {
-      queryParams.append('locale', locale);
-    }
+    appendStrapiLocale(queryParams, locale);
     
     const url = `/sectors/${documentId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await strapiAPI.get<StrapiSingleResponse<Sector>>(url);

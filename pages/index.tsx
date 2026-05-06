@@ -733,15 +733,13 @@ export const getStaticProps: GetStaticProps = async () => {
     console.log('🔄 Starting getStaticProps for Home page...');
     
     // 并行获取所有数据
-    const [sectorsEn, sectorsZh, homeData, eventsData] = await Promise.all([
+    const [sectorsEn, homeData, eventsData] = await Promise.all([
       getTraining('Network', 'en'),
-      getTraining('Network', 'zh-Hans'),
       getHome(),
       getEvents(4, 'en') // 获取前4条活动
     ]);
 
     console.log('✅ Sectors EN count:', sectorsEn?.length || 0);
-    console.log('✅ Sectors ZH count:', sectorsZh?.length || 0);
     console.log('🏠 Home data received:', !!homeData);
     console.log('📅 Events count:', eventsData?.length || 0);
     
@@ -787,7 +785,7 @@ export const getStaticProps: GetStaticProps = async () => {
       props: {
         sectors: {
           en: cleanSectors(sectorsEn),
-          'zh-Hans': cleanSectors(sectorsZh)
+          'zh-Hans': []
         },
         homeData: homeData || null,
         events: cleanEvents(eventsData),
