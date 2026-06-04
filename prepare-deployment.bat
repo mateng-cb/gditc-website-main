@@ -11,7 +11,8 @@ xcopy /E /I /Y "gditc\code" "deployment\gditc-code"
 REM 复制部署脚本
 echo 📝 复制部署脚本...
 copy "deployment\gditc-code\deploy.sh" "deployment\"
-copy "deployment\gditc-code\SERVER_DEPLOYMENT_GUIDE.md" "deployment\"
+if exist "docs\SERVER_DEPLOYMENT_GUIDE.md" copy "docs\SERVER_DEPLOYMENT_GUIDE.md" "deployment\"
+if exist "deployment\gditc-code\SERVER_DEPLOYMENT_GUIDE.md" copy "deployment\gditc-code\SERVER_DEPLOYMENT_GUIDE.md" "deployment\"
 
 REM 创建压缩包
 echo 📦 创建压缩包...

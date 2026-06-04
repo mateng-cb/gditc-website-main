@@ -2,6 +2,12 @@
 
 数字化国际贸易与商务协会（DITC）官方网站前端项目，基于 Next.js 构建，集成 Strapi CMS。
 
+## 📚 文档
+
+详细说明见 **[docs/](./docs/)** 目录，索引见 [docs/README.md](./docs/README.md)。
+
+- **当前生产**：Strapi 发内容 → 桥接 Worker → Git 提交 → Cloudflare **gditc** 自动构建 → [STRAPI_WEBHOOK_CLOUDFLARE_REBUILD.md](./docs/STRAPI_WEBHOOK_CLOUDFLARE_REBUILD.md)
+
 ## 🚀 技术栈
 
 - **前端框架**: Next.js 14 with TypeScript

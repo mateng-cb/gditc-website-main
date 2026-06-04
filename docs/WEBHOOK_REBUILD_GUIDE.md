@@ -1,5 +1,8 @@
 # Strapi Webhook 实时更新前端 - 方案一详细说明
 
+> **已归档 / 过时**：适用于自建服务器 + `start-static-server.js` 的 `/api/rebuild-trigger`。  
+> **当前生产（Cloudflare Worker + Git 自动构建）** 请参阅 [STRAPI_WEBHOOK_CLOUDFLARE_REBUILD.md](./STRAPI_WEBHOOK_CLOUDFLARE_REBUILD.md)。
+
 本文档面向不熟悉后端的开发者，详细讲解方案一的实现原理、相关概念和配置步骤。
 
 ---

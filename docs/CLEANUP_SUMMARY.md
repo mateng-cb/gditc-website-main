@@ -63,11 +63,12 @@
 - `prepare-deployment.bat` - 部署准备脚本
 - `start-static-server.js` - 静态服务器启动脚本
 
-### 文档
-- `DAILY_REBUILD_GUIDE.md` - 每日重建指南
-- `SERVER_DEPLOYMENT_GUIDE.md` - 服务器部署指南
-- `START_GUIDE.md` - 启动指南
-- `README.md` - 项目说明
+### 文档（现位于 `docs/`）
+- `docs/DAILY_REBUILD_GUIDE.md` - 每日重建指南
+- `docs/SERVER_DEPLOYMENT_GUIDE.md` - 服务器部署指南
+- `docs/START_GUIDE.md` - 启动指南
+- `docs/STRAPI_WEBHOOK_CLOUDFLARE_REBUILD.md` - Strapi → Worker → Git → CF 重建（当前生产）
+- `../README.md` - 项目说明
 
 ## 清理效果
 
