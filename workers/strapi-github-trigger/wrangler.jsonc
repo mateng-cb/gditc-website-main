@@ -1,0 +1,9 @@
+{
+  "name": "gditc-strapi-github-trigger",
+  "main": "index.js",
+  "compatibility_date": "2025-06-23",
+  "vars": {
+    "GITHUB_OWNER": "mateng-cb",
+    "GITHUB_REPO": "gditc-website-main"
+  }
+}
