@@ -18,7 +18,7 @@ export const useLanguage = () => useContext(LanguageContext);
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  // 固定语言为英文
+  // 固定语言为英文 
   const [language, setLanguage] = useState('en');
 
   // 语言切换处理函数（虽然固定为en，但保留接口兼容性）
